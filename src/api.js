@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = "http://192.168.1.16:8000/api/v1";
+const API_BASE = "https://barber-booking-backend-sxus.onrender.com/api/v1";
 
 // ==========================================
 // INTERCETTATORE DI SICUREZZA (AXIOS INTERCEPTOR)
