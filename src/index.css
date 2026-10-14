@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: only light;
+}
+
+body {
+  background-color: #f0f2f5;
+  color: #0f172a;
+}
+
 @theme {
   --font-display: "DM Serif Display", Georgia, serif;
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
