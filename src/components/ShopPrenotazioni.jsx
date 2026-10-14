@@ -28,15 +28,16 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
   }, [shopId]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-slate-50 animate-fade-up pb-24">
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-50">
       
       {/* HEADER STICKY */}
-      <div className="sticky top-0 z-10 flex items-center justify-center p-5 bg-white border-b border-neutral-200 shadow-sm">
+      <div className="sticky top-0 z-10 flex items-center justify-center p-5 bg-white border-b border-neutral-200 shadow-sm shrink-0">
         <h2 className="text-xl font-extrabold tracking-tight text-neutral-900">Le tue prenotazioni</h2>
       </div>
 
       {/* CONTENUTO DELLA PAGINA */}
-      <div className="flex-1 w-full max-w-xl px-4 py-6 mx-auto">
+      <div className="flex-1 w-full overflow-y-auto pb-28 animate-fade-up">
+        <div className="w-full max-w-xl px-4 py-6 mx-auto">
         
         {isLoading ? (
           // SKELETON LOADER (Effetto caricamento Premium)
@@ -124,6 +125,7 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
             })}
           </div>
         )}
+        </div>
       </div>
 
       {/* BOTTOM NAVIGATION BAR */}
