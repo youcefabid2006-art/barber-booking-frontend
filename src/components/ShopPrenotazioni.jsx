@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAdminBookings } from "../api"; // Usiamo questa temporaneamente per recuperare i dati
+import { getUserBookings } from "../api";
 
 export default function ShopPrenotazioni({ shopId, onHome }) {
   const [bookings, setBookings] = useState([]);
@@ -10,9 +10,7 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
     async function fetchMyBookings() {
       try {
         setIsLoading(true);
-        // NOTA INGEGNERISTICA: Attualmente peschiamo tutte le prenotazioni del negozio
-        // Quando ci sarà il login, qui useremo una rotta tipo getMyBookings()
-        const data = await getAdminBookings(shopId);
+        const data = await getUserBookings(shopId);
         
         // Ordiniamo dalla più recente alla più vecchia per comodità visiva
         const sortedData = data.sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime));
@@ -65,9 +63,9 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
           <div className="flex flex-col gap-4">
             {bookings.map((booking) => {
               const dataObj = new Date(booking.start_datetime);
-              const giornoNome = dataObj.toLocaleDateString("it-IT", { weekday: "long" });
-              const giornoNumero = dataObj.toLocaleDateString("it-IT", { day: "numeric", month: "long" });
-              const ora = dataObj.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+              const giornoNome = dataObj.toLocaleDateString("it-IT", { weekday: "long", timeZone: "Africa/Algiers" });
+              const giornoNumero = dataObj.toLocaleDateString("it-IT", { day: "numeric", month: "long", timeZone: "Africa/Algiers" });
+              const ora = dataObj.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Algiers" });
               
               return (
                 <div 

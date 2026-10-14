@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE = "https://barber-booking-backend-sxus.onrender.com/api/v1";
+const API_BASE = import.meta.env.DEV 
+  ? "http://localhost:8000/api/v1"
+  : "https://barber-booking-backend-sxus.onrender.com/api/v1";
 
 // ==========================================
 // INTERCETTATORE DI SICUREZZA (AXIOS INTERCEPTOR)
@@ -43,6 +45,20 @@ export async function createBooking(phoneNumber, otpCode) {
     phone_number: phoneNumber,
     otp_code: otpCode
   });
+  if (data && data.id) {
+    const savedIds = JSON.parse(localStorage.getItem("my_booking_ids") || "[]");
+    if (!savedIds.includes(data.id)) {
+      savedIds.push(data.id);
+      localStorage.setItem("my_booking_ids", JSON.stringify(savedIds));
+    }
+  }
+  return data;
+}
+
+export async function getUserBookings(shopId) {
+  const savedIds = JSON.parse(localStorage.getItem("my_booking_ids") || "[]");
+  if (!savedIds.length) return [];
+  const { data } = await axios.get(`${API_BASE}/shops/${shopId}/my-bookings?ids=${savedIds.join(",")}`);
   return data;
 }
 
