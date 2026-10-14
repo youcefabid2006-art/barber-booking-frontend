@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getUserBookings } from "../api";
 
-export default function ShopPrenotazioni({ shopId, onHome }) {
+export default function ShopPrenotazioni({ shopId, services = [], onHome }) {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -129,7 +129,7 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
                       <div>
                         <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Servizio</p>
                         <p className="text-sm font-bold text-slate-800">
-                          {booking.service ? booking.service.name : "-"}
+                          {services.find((s) => s.id === booking.service_id)?.name || "-"}
                         </p>
                       </div>
                     </div>

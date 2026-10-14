@@ -212,7 +212,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 
       {/* OVERLAY PRENOTAZIONI */}
       {showPrenotazioni && (
-        <ShopPrenotazioni shopId={shop.id} onHome={() => setShowPrenotazioni(false)} />
+        <ShopPrenotazioni shopId={shop.id} services={shop.services} onHome={() => setShowPrenotazioni(false)} />
       )}
     </>
   );
