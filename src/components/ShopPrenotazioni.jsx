@@ -69,8 +69,8 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
               const ora = dataObj.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Algiers" });
               
               return (
-                <div 
-                  key={booking.id} 
+                <div
+                  key={booking.id}
                   className="relative flex flex-col p-5 overflow-hidden transition-shadow bg-white border shadow-sm border-slate-200 rounded-2xl hover:shadow-md"
                 >
                   {/* Bordo decorativo laterale (Opzionale, dà un tocco di classe) */}
@@ -81,7 +81,7 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
                       <p className="text-xs font-bold tracking-wide uppercase text-slate-400 mb-1 capitalize">
                         {giornoNome}, {giornoNumero}
                       </p>
-                      <h4 className="text-3xl font-extrabold text-neutral-900 tracking-tight">{ora}</h4>
+                      <h4 className="text-2xl font-extrabold text-neutral-900 tracking-tight">{ora}</h4>
                     </div>
                     {/* Badge di stato */}
                     <div className="px-3 py-1 text-[10px] font-bold tracking-wider uppercase bg-green-50 border border-green-100 text-green-600 rounded-lg">
@@ -119,6 +119,21 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
                       </div>
                     </div>
 
+                    {/* Info Servizio */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 text-slate-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Servizio</p>
+                        <p className="text-sm font-bold text-slate-800">
+                          {booking.service ? booking.service.name : "-"}
+                        </p>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               );
@@ -132,8 +147,8 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
       <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
         <div className="flex items-center justify-around max-w-md px-6 pb-2 mx-auto">
           
-          <button 
-            onClick={onHome} 
+          <button
+            onClick={onHome}
             className="flex flex-col items-center justify-center p-2 transition-colors text-slate-400 hover:text-neutral-900 group"
           >
             <svg className="w-6 h-6 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,7 +157,7 @@ export default function ShopPrenotazioni({ shopId, onHome }) {
             <span className="text-[10px] font-bold tracking-wide uppercase">Home</span>
           </button>
 
-          <button 
+          <button
             className="flex flex-col items-center justify-center p-2 transition-colors text-neutral-900"
           >
             <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
