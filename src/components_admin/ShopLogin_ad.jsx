@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 // Assicurati che l'API_BASE punti al tuo backend FastAPI
-const API_BASE = "http://192.168.1.16:8000/api/v1";
+const API_BASE = "https://barber-booking-backend-sxus.onrender.com/api/v1";
 
 export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
   const [password, setPassword] = useState("");
