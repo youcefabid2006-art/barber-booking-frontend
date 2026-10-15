@@ -19,33 +19,33 @@ export default function ShopTeam_ad({
 
   return (
     <div className="animate-fade-up">
-      <div className="flex gap-5 mb-8 overflow-x-auto hide-scrollbar">
+      <div className="flex flex-wrap gap-6 py-2 mb-8">
         {barbers.map((b) => (
           <div
             key={b.id}
             onClick={() => handleSelectBarber(b)}
-            className={`flex flex-col items-center cursor-pointer transition-all duration-200 min-w-[80px] ${selectedBarber.id === b.id ? 'scale-105' : 'opacity-50 hover:opacity-80'}`}
+            className={`flex flex-col items-center cursor-pointer transition-all duration-200 ${selectedBarber.id === b.id ? '' : 'opacity-45 hover:opacity-80'}`}
           >
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2 shadow-md
-              ${selectedBarber.id === b.id ? 'bg-gradient-to-br from-neutral-900 to-neutral-700 ring-4 ring-neutral-200' : 'bg-neutral-400'}`}>
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 shadow-md transition-all
+              ${selectedBarber.id === b.id ? 'bg-neutral-900 ring-4 ring-neutral-200' : 'bg-neutral-800'}`}>
               {getInitials(b.name)}
             </div>
-            <span className={`font-bold ${selectedBarber.id === b.id ? 'text-neutral-900' : 'text-neutral-500'}`}>{b.name}</span>
+            <span className={`text-base font-bold ${selectedBarber.id === b.id ? 'text-neutral-900' : 'text-neutral-500'}`}>{b.name}</span>
           </div>
         ))}
       </div>
 
       <div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
         <h3 className="mb-6 text-lg font-extrabold text-neutral-900">Calendario di {selectedBarber.name}</h3>
-        
+       
         <div className="flex flex-col">
           {WEEKDAYS.map((dayName, dayIndex) => {
             const dayShifts = draftShifts.filter(s => s.weekday === dayIndex);
-            
+           
             return (
               <div key={dayIndex} className="flex flex-col py-5 border-b border-neutral-100 last:border-0 md:flex-row md:items-center gap-4">
                 <div className="w-32 font-bold text-neutral-800">{dayName}</div>
-                
+               
                 <div className="flex flex-wrap flex-1 gap-2">
                   {dayShifts.length === 0 ? (
                     <span className="px-3 py-1.5 text-sm font-bold text-neutral-400 bg-neutral-50 rounded-lg">Riposo</span>
@@ -89,7 +89,7 @@ export default function ShopTeam_ad({
             );
           })}
         </div>
-        
+       
         <div className="pt-8 mt-4 border-t border-neutral-100">
           <button
             onClick={handleSaveShifts}
