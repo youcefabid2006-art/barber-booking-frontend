@@ -282,6 +282,7 @@ export default function AdminDashboard() {
             filteredBookings={filteredBookings}
             isDeleting={isDeleting}
             handleDelete={handleDelete}
+            services={shopDetails?.services || []}
           />
         )}
 
