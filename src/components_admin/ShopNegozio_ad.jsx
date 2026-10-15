@@ -19,10 +19,39 @@ export default function ShopNegozio_ad({
   newServiceForm,
   setNewServiceForm,
   handleAddService,
-  handleDeleteService
+  handleDeleteService,
+  handleUpdateService
 }) {
   const [showTeamList, setShowTeamList] = useState(false);
   const [showServiceList, setShowServiceList] = useState(false);
+
+  // Stati per la modifica di un servizio direttamente nella lista
+  const [editingServiceId, setEditingServiceId] = useState(null);
+  const [editServiceForm, setEditServiceForm] = useState({ name: "", description: "", duration_minutes: 30, price: 0 });
+  const [isSavingService, setIsSavingService] = useState(false);
+
+  const startEditService = (serv) => {
+    setEditingServiceId(serv.id);
+    setEditServiceForm({
+      name: serv.name || "",
+      description: serv.description || "",
+      duration_minutes: serv.duration_minutes,
+      price: serv.price
+    });
+  };
+
+  const submitEditService = async (e) => {
+    e.preventDefault();
+    setIsSavingService(true);
+    const ok = await handleUpdateService(editingServiceId, {
+      name: editServiceForm.name.trim(),
+      description: editServiceForm.description.trim(),
+      duration_minutes: parseInt(editServiceForm.duration_minutes, 10),
+      price: parseFloat(editServiceForm.price)
+    });
+    setIsSavingService(false);
+    if (ok) setEditingServiceId(null);
+  };
 
   return (
     <>
@@ -210,7 +239,7 @@ export default function ShopNegozio_ad({
       {showServiceList && (
         <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white animate-fade-up">
           <div className="sticky top-0 z-10 flex items-center p-4 bg-white border-b border-neutral-200">
-            <button onClick={() => setShowServiceList(false)} className="p-2 mr-2 transition rounded-full text-neutral-600 hover:bg-neutral-100">
+            <button onClick={() => { setShowServiceList(false); setEditingServiceId(null); }} className="p-2 mr-2 transition rounded-full text-neutral-600 hover:bg-neutral-100">
               <svg className="w-6 h-6 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
@@ -224,23 +253,70 @@ export default function ShopNegozio_ad({
               ) : (
                 shopDetails.services.map((serv) => (
                   <div key={serv.id} className="flex flex-col gap-4 p-4 border sm:flex-row sm:items-center justify-between rounded-xl border-neutral-100 bg-neutral-50">
-                    <div className="flex-1">
-                      <h4 className="font-bold text-neutral-900">{serv.name}</h4>
-                      <p className="text-xs font-medium text-neutral-500 line-clamp-1">{serv.description || "Nessuna descrizione"}</p>
-                      <div className="flex gap-3 mt-1 text-sm font-bold text-neutral-700">
-                        <span>{serv.duration_minutes} min</span>
-                        <span>•</span>
-                        <span>€ {Number(serv.price).toFixed(2)}</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleDeleteService(serv.id)}
-                        className="px-3 py-1.5 text-xs font-bold text-red-500 transition-colors border border-red-200 rounded-lg hover:bg-red-50 active:scale-95 whitespace-nowrap"
-                      >
-                        Elimina
-                      </button>
-                    </div>
+                    {editingServiceId === serv.id ? (
+                      <form onSubmit={submitEditService} className="flex flex-col flex-1 gap-3">
+                        <div>
+                          <label className="block mb-1 text-xs font-bold tracking-wide uppercase text-neutral-800">Nome Servizio</label>
+                          <input type="text" required value={editServiceForm.name} onChange={(e) => setEditServiceForm({...editServiceForm, name: e.target.value})} className="w-full px-4 py-2 font-medium text-neutral-900 bg-white border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900" />
+                        </div>
+                        <div>
+                          <label className="block mb-1 text-xs font-bold tracking-wide uppercase text-neutral-800">Descrizione (Opzionale)</label>
+                          <textarea rows="2" value={editServiceForm.description} onChange={(e) => setEditServiceForm({...editServiceForm, description: e.target.value})} className="w-full px-4 py-2 font-medium text-neutral-900 bg-white border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900 resize-none"></textarea>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex-1">
+                            <label className="block mb-1 text-xs font-bold tracking-wide uppercase text-neutral-800">Durata (Minuti)</label>
+                            <input type="number" required min="5" step="5" value={editServiceForm.duration_minutes} onChange={(e) => setEditServiceForm({...editServiceForm, duration_minutes: e.target.value})} className="w-full px-4 py-2 font-medium text-neutral-900 bg-white border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="block mb-1 text-xs font-bold tracking-wide uppercase text-neutral-800">Prezzo (€)</label>
+                            <input type="number" required min="0" step="0.01" value={editServiceForm.price} onChange={(e) => setEditServiceForm({...editServiceForm, price: e.target.value})} className="w-full px-4 py-2 font-medium text-neutral-900 bg-white border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900" />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingServiceId(null)}
+                            className="px-3 py-1.5 text-xs font-bold text-neutral-700 transition-colors border border-neutral-200 rounded-lg hover:bg-neutral-100 active:scale-95 whitespace-nowrap"
+                          >
+                            Annulla
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={isSavingService}
+                            className="px-3 py-1.5 text-xs font-bold text-white transition-all rounded-lg bg-neutral-900 hover:bg-black active:scale-95 whitespace-nowrap disabled:opacity-50"
+                          >
+                            {isSavingService ? "Salvataggio..." : "Salva"}
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-neutral-900">{serv.name}</h4>
+                          <p className="text-xs font-medium text-neutral-500 line-clamp-1">{serv.description || "Nessuna descrizione"}</p>
+                          <div className="flex gap-3 mt-1 text-sm font-bold text-neutral-700">
+                            <span>{serv.duration_minutes} min</span>
+                            <span>•</span>
+                            <span>€ {Number(serv.price).toFixed(2)}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startEditService(serv)}
+                            className="px-3 py-1.5 text-xs font-bold text-neutral-700 transition-colors border border-neutral-200 rounded-lg hover:bg-neutral-100 active:scale-95 whitespace-nowrap"
+                          >
+                            Modifica
+                          </button>
+                          <button
+                            onClick={() => handleDeleteService(serv.id)}
+                            className="px-3 py-1.5 text-xs font-bold text-red-500 transition-colors border border-red-200 rounded-lg hover:bg-red-50 active:scale-95 whitespace-nowrap"
+                          >
+                            Elimina
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))
               )}

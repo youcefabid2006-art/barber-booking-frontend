@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   getAdminBookings, deleteAdminBooking, getAdminBarbers, updateBarberShifts,
-  getShopBySlug, updateShopDetails, createService, deleteService, createBarber,
+  getShopBySlug, updateShopDetails, createService, updateService, deleteService, createBarber,
   updateBarber, deleteBarber
 } from "../api";
 
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
     }
   }
 
-// --- FUNZIONI DI GESTIONE INVARIATE ---
+  // --- FUNZIONI DI GESTIONE INVARIATE ---
   const handleDelete = async (appointmentId) => {
     const conferma = window.confirm("Sei sicuro di annullare questa prenotazione?");
     if (!conferma) return;
@@ -192,6 +192,19 @@ export default function AdminDashboard() {
     }
   };
 
+  // Modifica di un servizio (nome, descrizione, durata, prezzo). Ritorna true se è andata a buon fine.
+  const handleUpdateService = async (serviceId, data) => {
+    try {
+      await updateService(serviceId, data);
+      await loadDashboardData();
+      return true;
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      alert(typeof detail === "string" ? detail : "Errore durante la modifica del servizio.");
+      return false;
+    }
+  };
+
   const handleAddBarber = async (e) => {
     e.preventDefault();
     if(!newBarberForm.name.trim()) return;
@@ -244,7 +257,7 @@ export default function AdminDashboard() {
     );
   }
 
-// 2. Se siamo loggati ma i dati stanno caricando
+  // 2. Se siamo loggati ma i dati stanno caricando
   if (isLoading && bookings.length === 0) {
     return <div className="flex items-center justify-center min-h-screen font-medium bg-[#F0F2F5] text-neutral-500">Caricamento pannello admin...</div>;
   }
@@ -340,6 +353,7 @@ export default function AdminDashboard() {
             setNewServiceForm={setNewServiceForm}
             handleAddService={handleAddService}
             handleDeleteService={handleDeleteService}
+            handleUpdateService={handleUpdateService}
           />
         )}
 

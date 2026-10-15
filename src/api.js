@@ -111,6 +111,11 @@ export async function createService(shopId, payload) {
   return data;
 }
 
+export async function updateService(serviceId, payload) {
+  const { data } = await axios.put(`${API_BASE}/admin/services/${serviceId}`, payload);
+  return data;
+}
+
 export async function deleteService(serviceId) {
   const { data } = await axios.delete(`${API_BASE}/admin/services/${serviceId}`);
   return data;
