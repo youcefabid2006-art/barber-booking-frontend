@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   getAdminBookings, deleteAdminBooking, getAdminBarbers, updateBarberShifts,
-  getShopBySlug, updateShopDetails, createService, deleteService, createBarber
+  getShopBySlug, updateShopDetails, createService, deleteService, createBarber,
+  updateBarber, deleteBarber
 } from "../api";
 
 import ShopAppuntamenti_ad from "../components_admin/ShopAppuntamenti_ad.jsx";
 import ShopTeam_ad from "../components_admin/ShopTeam_ad.jsx";
 import ShopNegozio_ad from "../components_admin/ShopNegozio_ad.jsx";
 // IMPORTIAMO LA NUOVA PAGINA DI LOGIN
-import ShopLogin_ad from "../components_admin/ShopLogin_ad.jsx"; 
+import ShopLogin_ad from "../components_admin/ShopLogin_ad.jsx";
 
 const WEEKDAYS = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
 
@@ -71,7 +72,7 @@ export default function AdminDashboard() {
     try {
       const shopData = await getShopBySlug("barberia-picasso");
       setShopDetails(shopData);
-      
+     
       setShopForm({
         name: shopData.name || "",
         slug: shopData.slug || "",
@@ -90,7 +91,7 @@ export default function AdminDashboard() {
       ]);
       setBookings(bookingsData);
       setBarbers(barbersData);
-      
+     
       if (barbersData.length > 0) {
         setSelectedBarber(barbersData[0]);
         setDraftShifts(barbersData[0].shifts || []);
@@ -102,7 +103,7 @@ export default function AdminDashboard() {
     }
   }
 
-  // --- FUNZIONI DI GESTIONE INVARIATE ---
+// --- FUNZIONI DI GESTIONE INVARIATE ---
   const handleDelete = async (appointmentId) => {
     const conferma = window.confirm("Sei sicuro di annullare questa prenotazione?");
     if (!conferma) return;
@@ -204,6 +205,27 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateBarber = async (barberId, currentName) => {
+    const newName = window.prompt("Inserisci il nuovo nome del collaboratore:", currentName);
+    if (!newName || !newName.trim() || newName.trim() === currentName) return;
+    try {
+      await updateBarber(barberId, newName.trim());
+      await loadDashboardData();
+    } catch (err) {
+      alert("Errore durante la modifica del collaboratore.");
+    }
+  };
+
+  const handleDeleteBarber = async (barberId) => {
+    if (!window.confirm("Vuoi davvero eliminare questo collaboratore?")) return;
+    try {
+      await deleteBarber(barberId);
+      await loadDashboardData();
+    } catch (err) {
+      alert("Errore durante l'eliminazione del collaboratore.");
+    }
+  };
+
   const handleOpeningHoursChange = (dbDay, value) => {
     setShopForm(prev => ({ ...prev, opening_hours: { ...prev.opening_hours, [dbDay]: value } }));
   };
@@ -215,14 +237,14 @@ export default function AdminDashboard() {
   // 1. Se non siamo loggati, mostra il Login
   if (!isAuthenticated) {
     return (
-      <ShopLogin_ad 
-        shopSlug="barberia-picasso" 
-        onLoginSuccess={() => setIsAuthenticated(true)} 
+      <ShopLogin_ad
+        shopSlug="barberia-picasso"
+        onLoginSuccess={() => setIsAuthenticated(true)}
       />
     );
   }
 
-  // 2. Se siamo loggati ma i dati stanno caricando
+// 2. Se siamo loggati ma i dati stanno caricando
   if (isLoading && bookings.length === 0) {
     return <div className="flex items-center justify-center min-h-screen font-medium bg-[#F0F2F5] text-neutral-500">Caricamento pannello admin...</div>;
   }
@@ -236,18 +258,18 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen p-4 md:p-8 bg-[#F0F2F5] font-sans">
       <div className="max-w-6xl mx-auto">
-        
+       
         {/* Intestazione e Tasto Logout */}
         <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">Dashboard Salone</h1>
             <p className="mt-1 font-medium text-neutral-500">Gestisci gli appuntamenti, il tuo team e le informazioni pubbliche.</p>
           </div>
-          <button 
+          <button
             onClick={() => {
               localStorage.removeItem("admin_token");
               setIsAuthenticated(false);
-            }} 
+            }}
             className="px-4 py-2 text-sm font-bold text-red-600 transition-colors border border-red-200 rounded-xl hover:bg-red-50"
           >
             Esci dall'Account
@@ -274,7 +296,7 @@ export default function AdminDashboard() {
             Negozio e Servizi
           </button>
         </div>
-        
+       
         {activeTab === "bookings" && (
           <ShopAppuntamenti_ad
             filterDate={filterDate}
@@ -311,6 +333,8 @@ export default function AdminDashboard() {
             newBarberForm={newBarberForm}
             setNewBarberForm={setNewBarberForm}
             handleAddBarber={handleAddBarber}
+            handleUpdateBarber={handleUpdateBarber}
+            handleDeleteBarber={handleDeleteBarber}
             barbers={barbers}
             newServiceForm={newServiceForm}
             setNewServiceForm={setNewServiceForm}

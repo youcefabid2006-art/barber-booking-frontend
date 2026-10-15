@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.DEV 
+const API_BASE = import.meta.env.DEV
   ? "http://localhost:8000/api/v1"
   : "https://barber-booking-backend-sxus.onrender.com/api/v1";
 
@@ -65,7 +65,7 @@ export async function getUserBookings(shopId) {
 export async function getAvailability(shopId, serviceId, date, barberId = null) {
   // Costruiamo l'URL base con i parametri obbligatori
   let url = `${API_BASE}/availability?shop_id=${shopId}&service_id=${serviceId}&date=${date}`;
-  
+ 
   // Se è stato scelto un barbiere specifico, aggiungiamo il parametro
   if (barberId && barberId !== "any") {
     url += `&barber_id=${barberId}`;
@@ -118,5 +118,15 @@ export async function deleteService(serviceId) {
 
 export async function createBarber(shopId, payload) {
   const { data } = await axios.post(`${API_BASE}/admin/shops/${shopId}/barbers`, payload);
+  return data;
+}
+
+export async function updateBarber(barberId, name) {
+  const { data } = await axios.put(`${API_BASE}/admin/barbers/${barberId}`, { name });
+  return data;
+}
+
+export async function deleteBarber(barberId) {
+  const { data } = await axios.delete(`${API_BASE}/admin/barbers/${barberId}`);
   return data;
 }

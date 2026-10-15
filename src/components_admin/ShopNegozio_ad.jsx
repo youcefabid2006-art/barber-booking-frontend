@@ -13,6 +13,8 @@ export default function ShopNegozio_ad({
   newBarberForm,
   setNewBarberForm,
   handleAddBarber,
+  handleUpdateBarber,
+  handleDeleteBarber,
   barbers,
   newServiceForm,
   setNewServiceForm,
@@ -26,7 +28,7 @@ export default function ShopNegozio_ad({
     <>
       {/* Contenitore principale della griglia (separato dagli overlay) */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 animate-fade-up">
-        
+       
         {/* COLONNA SINISTRA */}
         <div className="flex flex-col gap-8 md:col-span-5">
           <div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
@@ -97,7 +99,7 @@ export default function ShopNegozio_ad({
                 Aggiungi
               </button>
             </form>
-            
+           
             <div className="flex justify-end pt-2 border-t border-neutral-100">
               <button
                 type="button"
@@ -184,13 +186,13 @@ export default function ShopNegozio_ad({
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => alert("Per modificare un barbiere è necessario aggiungere la rotta PUT nel backend.")}
+                        onClick={() => handleUpdateBarber(b.id, b.name)}
                         className="px-3 py-1.5 text-xs font-bold text-neutral-700 transition-colors border border-neutral-200 rounded-lg hover:bg-neutral-100 active:scale-95 whitespace-nowrap"
                       >
                         Modifica
                       </button>
                       <button
-                        onClick={() => alert("Per eliminare un barbiere è necessario aggiungere la rotta DELETE nel backend.")}
+                        onClick={() => handleDeleteBarber(b.id)}
                         className="px-3 py-1.5 text-xs font-bold text-red-500 transition-colors border border-red-200 rounded-lg hover:bg-red-50 active:scale-95 whitespace-nowrap"
                       >
                         Elimina
