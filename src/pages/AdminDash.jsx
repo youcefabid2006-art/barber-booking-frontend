@@ -188,7 +188,7 @@ export default function AdminDashboard() {
       await deleteService(serviceId);
       await loadDashboardData();
     } catch (err) {
-      alert("Errore durante l'eliminazione del servizio.");
+      alert(err?.response?.data?.detail || "Errore durante l'eliminazione del servizio.");
     }
   };
 
