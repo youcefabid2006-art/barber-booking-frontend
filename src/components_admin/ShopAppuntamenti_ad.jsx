@@ -30,7 +30,59 @@ export default function ShopAppuntamenti_ad({
       </div>
 
       <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-neutral-200">
-        <div className="overflow-x-auto">
+        {/* VISTA TELEFONO (Senza scorrimento orizzontale) */}
+        <div className="divide-y divide-neutral-100 md:hidden">
+          {filteredBookings.length === 0 ? (
+            <div className="p-12 text-center">
+              <span className="block mb-2 text-3xl">📅</span>
+              <span className="font-medium text-neutral-500">Nessuna prenotazione per questa data.</span>
+            </div>
+          ) : (
+            filteredBookings.map((booking) => {
+              const dataObj = new Date(booking.start_datetime);
+              const dataFormattata = dataObj.toLocaleDateString("it-IT", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
+              const oraFormattata = dataObj.toLocaleTimeString("it-IT", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
+
+              return (
+                <div key={booking.id} className="flex flex-col gap-3 p-4 transition-colors hover:bg-neutral-50">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium text-neutral-900">
+                      {dataFormattata} <span className="ml-1.5 font-bold text-neutral-600">{oraFormattata}</span>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(booking.id)}
+                      disabled={isDeleting === booking.id}
+                      className={`px-4 py-1.5 text-xs font-bold transition-all border-2 rounded-lg
+                        ${isDeleting === booking.id
+                          ? 'border-neutral-200 text-neutral-400 bg-neutral-100 cursor-not-allowed'
+                          : 'border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 active:scale-95'}`}
+                    >
+                      {isDeleting === booking.id ? 'Annullamento...' : 'Annulla'}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div>
+                      <p className="font-bold capitalize text-neutral-800">
+                        {booking.customer_name} {booking.customer_surname}
+                      </p>
+                      <p className="mt-0.5 font-mono text-xs font-medium text-neutral-500">
+                        {booking.customer_phone}
+                      </p>
+                    </div>
+                    <div className="font-bold text-right text-neutral-900">
+                      <span className="block text-[10px] font-bold tracking-wider uppercase text-neutral-400">Barbiere</span>
+                      {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-0.5 text-xs uppercase tracking-wider bg-neutral-100 text-neutral-600 rounded-md">Qualsiasi</span>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* VISTA PC / DESKTOP (Tabella originale intatta) */}
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200">
