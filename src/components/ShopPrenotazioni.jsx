@@ -147,7 +147,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
 
       {/* BOTTOM NAVIGATION BAR */}
       <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
-        <div className="flex items-center justify-around max-w-md px-6 pb-2 mx-auto">
+        <div className={`${isAdminAuth ? "grid grid-cols-3 items-center justify-items-center" : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
           
           <button
             onClick={onHome}

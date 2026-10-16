@@ -14,6 +14,111 @@ import ShopLogin_ad from "../components_admin/ShopLogin_ad.jsx";
 
 const WEEKDAYS = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
 
+// ===== POPUP NELLO STILE DELLA PAGINA (al posto di alert / confirm / prompt del browser) =====
+let dialogSeq = 0;
+
+const DIALOG_ICONS = {
+  success: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+  error: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  delete: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
+  edit: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+};
+
+function DialogCard({ dialog, onClose }) {
+  const [text, setText] = useState(dialog.initialValue || "");
+  const isPrompt = dialog.kind === "prompt";
+  const isConfirm = dialog.kind === "confirm";
+  const isMessage = dialog.kind === "message";
+  const isSuccess = isMessage && dialog.type === "success";
+  const isError = isMessage && dialog.type === "error";
+  const danger = isConfirm && dialog.danger !== false;
+
+  const title = dialog.title || (isSuccess ? "Fatto!" : "Qualcosa è andato storto");
+  const iconPath = isSuccess ? DIALOG_ICONS.success : isError ? DIALOG_ICONS.error : isConfirm ? DIALOG_ICONS.delete : DIALOG_ICONS.edit;
+  const iconTone = isSuccess ? "bg-green-50 text-green-600" : (isError || danger) ? "bg-red-50 text-red-500" : "bg-neutral-100 text-neutral-900";
+
+  const cancel = () => onClose(isPrompt ? null : isConfirm ? false : true);
+
+  // Chiusura con il tasto Esc (utile da computer)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") cancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const cancelBtn = "flex-1 py-3 text-sm font-bold transition-colors rounded-xl text-neutral-700 bg-neutral-100 hover:bg-neutral-200 active:scale-95";
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="absolute inset-0 bg-black/40" onClick={cancel} />
+
+      <div className="relative w-full max-w-sm p-6 text-center bg-white border shadow-2xl rounded-2xl border-neutral-200">
+        <div className={`flex items-center justify-center mx-auto mb-4 rounded-full w-14 h-14 ${iconTone}`}>
+          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />
+          </svg>
+        </div>
+
+        <h3 className="mb-1 text-lg font-extrabold text-neutral-900">{title}</h3>
+        {dialog.message && <p className="text-sm font-medium break-words text-neutral-500">{dialog.message}</p>}
+
+        {isPrompt ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onClose(text);
+            }}
+            className="mt-5"
+          >
+            <input
+              autoFocus
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className="w-full px-4 py-2 font-medium text-neutral-900 placeholder-neutral-400 border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900"
+            />
+            <div className="flex gap-3 mt-5">
+              <button type="button" onClick={cancel} className={cancelBtn}>Annulla</button>
+              <button type="submit" className="flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95">
+                {dialog.confirmLabel || "Salva"}
+              </button>
+            </div>
+          </form>
+        ) : isConfirm ? (
+          <div className="flex gap-3 mt-6">
+            <button type="button" autoFocus={danger} onClick={cancel} className={cancelBtn}>{dialog.cancelLabel || "Annulla"}</button>
+            <button
+              type="button"
+              onClick={() => onClose(true)}
+              className={`flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl active:scale-95 ${danger ? "bg-red-500 hover:bg-red-600" : "bg-neutral-900 hover:bg-black"}`}
+            >
+              {dialog.confirmLabel || "Conferma"}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-6">
+            <button
+              type="button"
+              autoFocus
+              onClick={() => onClose(true)}
+              className="w-full py-3 text-sm font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95"
+            >
+              {isSuccess ? "Ok" : "Chiudi"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DialogHost({ dialog, onClose }) {
+  if (!dialog) return null;
+  return <DialogCard key={dialog.id} dialog={dialog} onClose={onClose} />;
+}
+
 export default function AdminDashboard() {
   const { id } = useParams();
   const activeShopId = id || 1;
@@ -49,6 +154,19 @@ export default function AdminDashboard() {
     name: "", description: "", duration_minutes: 30, price: 0
   });
   const [newBarberForm, setNewBarberForm] = useState({ name: "" });
+
+  // Popup nello stile della pagina: ritornano una Promise, come alert / confirm / prompt
+  const [dialog, setDialog] = useState(null);
+  const openDialog = (config) => new Promise((resolve) => setDialog({ ...config, resolve, id: ++dialogSeq }));
+  const closeDialog = (result) => {
+    if (dialog) dialog.resolve(result);
+    setDialog(null);
+  };
+  const notify = (type, message, title) => openDialog({ kind: "message", type, message, title });
+  const askConfirm = (title, message, confirmLabel = "Conferma", danger = true, cancelLabel = "Annulla") =>
+    openDialog({ kind: "confirm", title, message, confirmLabel, danger, cancelLabel });
+  const askText = (title, message, initialValue = "", confirmLabel = "Salva") =>
+    openDialog({ kind: "prompt", title, message, initialValue, confirmLabel });
 
   // Controllo del Token all'avvio
   useEffect(() => {
@@ -105,14 +223,14 @@ export default function AdminDashboard() {
 
   // --- FUNZIONI DI GESTIONE INVARIATE ---
   const handleDelete = async (appointmentId) => {
-    const conferma = window.confirm("Sei sicuro di annullare questa prenotazione?");
+    const conferma = await askConfirm("Annulla prenotazione", "Sei sicuro di annullare questa prenotazione?", "Sì, annulla", true, "Indietro");
     if (!conferma) return;
     setIsDeleting(appointmentId);
     try {
       await deleteAdminBooking(appointmentId);
       setBookings(prev => prev.filter(b => b.id !== appointmentId));
     } catch (err) {
-      alert("Errore durante la cancellazione.");
+      await notify("error", "Errore durante la cancellazione.");
     } finally {
       setIsDeleting(null);
     }
@@ -130,8 +248,8 @@ export default function AdminDashboard() {
 
   const handleAddShift = (weekday) => {
     const { start, end } = newShiftInputs[weekday];
-    if (!start || !end) return alert("Inserisci sia l'orario di inizio che di fine.");
-    if (start >= end) return alert("L'orario di fine deve essere successivo all'inizio.");
+    if (!start || !end) return notify("error", "Inserisci sia l'orario di inizio che di fine.", "Orario mancante");
+    if (start >= end) return notify("error", "L'orario di fine deve essere successivo all'inizio.", "Orario non valido");
     const newShift = {
       barber_id: selectedBarber.id,
       weekday: weekday,
@@ -150,10 +268,12 @@ export default function AdminDashboard() {
     setIsSavingShifts(true);
     try {
       await updateBarberShifts(selectedBarber.id, draftShifts);
-      alert("Orari aggiornati con successo!");
+      setIsSavingShifts(false);
+      await notify("success", "Orari aggiornati con successo!");
       await loadDashboardData();
     } catch (err) {
-      alert("Errore durante il salvataggio degli orari.");
+      setIsSavingShifts(false);
+      await notify("error", "Errore durante il salvataggio degli orari.");
     } finally {
       setIsSavingShifts(false);
     }
@@ -163,10 +283,10 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await updateShopDetails(activeShopId, shopForm);
-      alert("Informazioni negozio aggiornate con successo!");
+      await notify("success", "Informazioni negozio aggiornate con successo!");
       await loadDashboardData();
     } catch (err) {
-      alert("Errore nell'aggiornamento del negozio.");
+      await notify("error", "Errore nell'aggiornamento del negozio.");
     }
   };
 
@@ -174,21 +294,22 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await createService(activeShopId, { ...newServiceForm, shop_id: activeShopId });
-      alert("Servizio aggiunto con successo!");
+      await notify("success", "Servizio aggiunto con successo!");
       setNewServiceForm({ name: "", description: "", duration_minutes: 30, price: 0 });
       await loadDashboardData();
     } catch (err) {
-      alert("Errore nell'aggiunta del servizio.");
+      await notify("error", "Errore nell'aggiunta del servizio.");
     }
   };
 
   const handleDeleteService = async (serviceId) => {
-    if(!window.confirm("Vuoi davvero eliminare questo servizio?")) return;
+    if (!(await askConfirm("Elimina servizio", "Vuoi davvero eliminare questo servizio?", "Elimina"))) return;
     try {
       await deleteService(serviceId);
       await loadDashboardData();
     } catch (err) {
-      alert(err?.response?.data?.detail || "Errore durante l'eliminazione del servizio.");
+      const detail = err?.response?.data?.detail;
+      await notify("error", typeof detail === "string" ? detail : "Errore durante l'eliminazione del servizio.");
     }
   };
 
@@ -200,7 +321,7 @@ export default function AdminDashboard() {
       return true;
     } catch (err) {
       const detail = err?.response?.data?.detail;
-      alert(typeof detail === "string" ? detail : "Errore durante la modifica del servizio.");
+      await notify("error", typeof detail === "string" ? detail : "Errore durante la modifica del servizio.");
       return false;
     }
   };
@@ -210,32 +331,32 @@ export default function AdminDashboard() {
     if(!newBarberForm.name.trim()) return;
     try {
       await createBarber(activeShopId, { ...newBarberForm, shop_id: activeShopId });
-      alert("Collaboratore aggiunto con successo!");
+      await notify("success", "Collaboratore aggiunto con successo!");
       setNewBarberForm({ name: "" });
       await loadDashboardData();
     } catch (err) {
-      alert("Errore nell'aggiunta del collaboratore.");
+      await notify("error", "Errore nell'aggiunta del collaboratore.");
     }
   };
 
   const handleUpdateBarber = async (barberId, currentName) => {
-    const newName = window.prompt("Inserisci il nuovo nome del collaboratore:", currentName);
+    const newName = await askText("Modifica collaboratore", "Inserisci il nuovo nome del collaboratore:", currentName);
     if (!newName || !newName.trim() || newName.trim() === currentName) return;
     try {
       await updateBarber(barberId, newName.trim());
       await loadDashboardData();
     } catch (err) {
-      alert("Errore durante la modifica del collaboratore.");
+      await notify("error", "Errore durante la modifica del collaboratore.");
     }
   };
 
   const handleDeleteBarber = async (barberId) => {
-    if (!window.confirm("Vuoi davvero eliminare questo collaboratore?")) return;
+    if (!(await askConfirm("Elimina collaboratore", "Vuoi davvero eliminare questo collaboratore?", "Elimina"))) return;
     try {
       await deleteBarber(barberId);
       await loadDashboardData();
     } catch (err) {
-      alert("Errore durante l'eliminazione del collaboratore.");
+      await notify("error", "Errore durante l'eliminazione del collaboratore.");
     }
   };
 
@@ -358,6 +479,8 @@ export default function AdminDashboard() {
         )}
 
       </div>
+
+      <DialogHost dialog={dialog} onClose={closeDialog} />
     </div>
   );
 }

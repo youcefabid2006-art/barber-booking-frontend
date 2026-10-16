@@ -18,6 +18,7 @@ export default function ShopAppuntamenti_ad({
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
+              onClick={(e) => {try { e.currentTarget.showPicker(); } catch (err) {} }}
               className="px-4 py-2 font-medium bg-white border border-neutral-200 rounded-xl focus:outline-none focus:border-neutral-900"
             />
           </div>
