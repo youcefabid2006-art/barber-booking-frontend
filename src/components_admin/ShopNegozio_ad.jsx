@@ -116,7 +116,10 @@ export default function ShopNegozio_ad({
               </button>
             </form>
           </div>
+        </div>
 
+        {/* COLONNA DESTRA */}
+        <div className="flex flex-col gap-8 md:col-span-7">
           <div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
             <h3 className="mb-4 text-lg font-extrabold text-neutral-900">Aggiungi Collaboratore</h3>
             <form onSubmit={handleAddBarber} className="flex items-end gap-2 mb-4">
@@ -142,10 +145,7 @@ export default function ShopNegozio_ad({
               </button>
             </div>
           </div>
-        </div>
 
-        {/* COLONNA DESTRA */}
-        <div className="flex flex-col gap-8 md:col-span-7">
           <div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
             <h3 className="mb-6 text-lg font-extrabold text-neutral-900">Nuovo Servizio</h3>
             <form onSubmit={handleAddService} className="flex flex-col gap-4 mb-4">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAvailability, createBooking, requestOtp } from "../api";
+import { getAvailabilityDetailed, createBooking, requestOtp } from "../api";
 
 // --- FUNZIONE DI SUPPORTO PER GENERARE I PROSSIMI 14 GIORNI (DINAMICA) ---
 // RIPRISTINATA ESATTAMENTE COME NELLA VERSIONE ORIGINALE
@@ -46,6 +46,12 @@ function getNext14Days(barbers = [], selectedBarber = null) {
   return days;
 }
 
+// Riconosce l'errore 400 del backend "orario non prenotabile" (fuori turno, troppo lungo, occupato, passato)
+function isSlotUnavailableError(error) {
+  const detail = String(error?.response?.data?.detail || "").toLowerCase();
+  return error?.response?.status === 400 && detail.includes("time slot");
+}
+
 export default function ShopBooking({ shopId, service, barbers, onClose }) {
   const [step, setStep] = useState(1);
   const [selectedBarber, setSelectedBarber] = useState(null);
@@ -55,10 +61,13 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
   const availableDays = getNext14Days(barbers, selectedBarber);
   
   const [selectedDate, setSelectedDate] = useState(availableDays[0]?.fullDate || new Date().toISOString().split('T')[0]);
+  // Ogni elemento è { time: "09:00", available: true/false } (false = orario sbiadito)
   const [availableSlots, setAvailableSlots] = useState([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [selectedTime, setSelectedTime] = useState(null);
   const [fetchError, setFetchError] = useState(false);
+  // Orario per cui mostrare il popup "non disponibile" (null = popup chiuso)
+  const [unavailableTime, setUnavailableTime] = useState(null);
   
   // STATI CLIENTE E OTP (STEP 3 & 4)
   const [clientData, setClientData] = useState({
@@ -90,7 +99,7 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
       async function fetchSlots() {
         setIsLoadingSlots(true);
         try {
-          const slots = await getAvailability(shopId, service.id, selectedDate, selectedBarber);
+          const slots = await getAvailabilityDetailed(shopId, service.id, selectedDate, selectedBarber);
           if (isMounted) {
             setAvailableSlots(slots);
           }
@@ -179,7 +188,14 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
       setStep(4); // Passa alla schermata inserimento OTP
     } catch (error) {
       console.error("Errore generazione OTP:", error);
-      alert("C'è stato un problema di connessione. Riprova.");
+      if (isSlotUnavailableError(error)) {
+        // Orario non prenotabile: popup, e torniamo agli orari (che si ricaricano da soli)
+        setUnavailableTime(selectedTime);
+        setSelectedTime(null);
+        setStep(2);
+      } else {
+        alert("C'è stato un problema di connessione. Riprova.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -195,8 +211,16 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
       setStep(5); // Successo!
     } catch (error) {
       console.error("Errore validazione OTP:", error);
-      alert("Il codice inserito non è valido o è scaduto. Riprova.");
-      setOtpCode("");
+      if (isSlotUnavailableError(error)) {
+        // Caso raro: mentre inserivi il codice qualcuno ha preso lo stesso orario
+        setUnavailableTime(selectedTime);
+        setSelectedTime(null);
+        setOtpCode("");
+        setStep(2);
+      } else {
+        alert("Il codice inserito non è valido o è scaduto. Riprova.");
+        setOtpCode("");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -316,14 +340,26 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
                   </div>
                 ) : availableSlots.length > 0 ? (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {availableSlots.map(time => (
-                      <button
-                        key={time}
-                        onClick={() => handleTimeSelect(time)}
-                        className="py-4 text-lg font-bold transition-all bg-white border-2 text-slate-700 border-slate-100 rounded-2xl hover:border-neutral-900 hover:text-neutral-900 hover:shadow-md active:scale-[0.97]"
-                      >
-                        {time}
-                      </button>
+                    {availableSlots.map(slot => (
+                      slot.available ? (
+                        <button
+                          key={slot.time}
+                          onClick={() => handleTimeSelect(slot.time)}
+                          className="py-4 text-lg font-bold transition-all bg-white border-2 text-slate-700 border-slate-100 rounded-2xl hover:border-neutral-900 hover:text-neutral-900 hover:shadow-md active:scale-[0.97]"
+                        >
+                          {slot.time}
+                        </button>
+                      ) : (
+                        // Orario non prenotabile con questo servizio: più chiaro, e al click compare il popup
+                        <button
+                          key={slot.time}
+                          onClick={() => setUnavailableTime(slot.time)}
+                          aria-disabled="true"
+                          className="py-4 text-lg font-bold transition-all border-2 cursor-not-allowed bg-slate-100 text-slate-300 border-slate-100 rounded-2xl active:scale-[0.97]"
+                        >
+                          {slot.time}
+                        </button>
+                      )
                     ))}
                   </div>
                 ) : (
@@ -421,6 +457,35 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
 
         </div>
       </div>
+
+      {/* POPUP: ORARIO NON DISPONIBILE PER QUESTO SERVIZIO */}
+      {unavailableTime && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm"
+          onClick={() => setUnavailableTime(null)}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            className="w-full max-w-sm p-6 text-center bg-white shadow-2xl rounded-3xl animate-fade-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full shadow-inner bg-neutral-100">
+              <span className="text-3xl">⏱️</span>
+            </div>
+            <h3 className="mb-2 text-xl font-extrabold text-slate-800">Orario non disponibile</h3>
+            <p className="mb-6 text-sm font-medium text-slate-500">
+              {service.name} ({service.duration_minutes} min) non è disponibile per le {unavailableTime}. Scegli un altro orario.
+            </p>
+            <button
+              onClick={() => setUnavailableTime(null)}
+              className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-neutral-900 to-neutral-800 rounded-2xl active:scale-[0.98]"
+            >
+              Ho capito
+            </button>
+          </div>
+        </div>
+      )}
       
       <style dangerouslySetInnerHTML={{__html: `
         .hide-scrollbar::-webkit-scrollbar { display: none; }

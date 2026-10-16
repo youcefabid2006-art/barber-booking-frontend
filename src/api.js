@@ -75,6 +75,19 @@ export async function getAvailability(shopId, serviceId, date, barberId = null) 
   return data; // Ritorna l'array di orari (es. ["10:00", "10:30"])
 }
 
+// NUOVA: come getAvailability, ma restituisce anche gli orari NON prenotabili con questo servizio
+// (available: false) per mostrarli sbiaditi. Usata da ShopBooking.
+export async function getAvailabilityDetailed(shopId, serviceId, date, barberId = null) {
+  let url = `${API_BASE}/availability/detailed?shop_id=${shopId}&service_id=${serviceId}&date=${date}`;
+
+  if (barberId && barberId !== "any") {
+    url += `&barber_id=${barberId}`;
+  }
+
+  const { data } = await axios.get(url);
+  return data; // Ritorna l'array di orari (es. [{ time: "10:00", available: true }, { time: "16:00", available: false }])
+}
+
 // ... il resto di api.js (rotte Admin) rimane esattamente come prima
 export async function getAdminBookings(shopId) {
   const { data } = await axios.get(`${API_BASE}/admin/shops/${shopId}/bookings`);
