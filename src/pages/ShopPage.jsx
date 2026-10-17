@@ -4,7 +4,7 @@ import { getShopBySlug } from "../api";
 import ShopVetrina from "../components/ShopVetrina";
 import ShopServizi from "../components/ShopServizi";
 import ShopBooking from "../components/ShopBooking";
-import ShopDettagli from "../components/ShopDettagli"; 
+import ShopDettagli from "../components/ShopDettagli";
 
 export default function ShopPage() {
   const { slug } = useParams();
@@ -22,7 +22,7 @@ export default function ShopPage() {
         const data = await getShopBySlug(slug);
         if (!cancelled) setShop(data);
       } catch (err) {
-        if (!cancelled) setError("Errore di connessione o negozio non trovato");
+        if (!cancelled) setError("Erreur de connexion ou salon introuvable");
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -35,12 +35,12 @@ export default function ShopPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F0F2F5] animate-pulse pb-20">
-        
+       
         {/* SKELETON VETRINA (Immagine + Testo sotto) */}
         <div className="bg-white pb-6 shadow-sm rounded-b-3xl overflow-hidden">
           {/* Finta Immagine Netta */}
           <div className="h-64 md:h-[400px] bg-slate-200 w-full"></div>
-          
+         
           {/* Finto Box info negozio (staccato dall'immagine) */}
           <div className="max-w-3xl px-4 py-6 mx-auto md:px-8">
             <div className="h-8 bg-slate-200 rounded-xl w-3/4 mb-4"></div> {/* Titolo */}
@@ -48,11 +48,11 @@ export default function ShopPage() {
             <div className="h-14 bg-neutral-800 rounded-xl w-full"></div> {/* Bottone Dettagli Nero */}
           </div>
         </div>
-        
+       
         {/* SKELETON LISTA SERVIZI */}
         <main className="max-w-3xl px-4 mx-auto mt-6 md:px-8">
           <div className="h-6 bg-slate-300 rounded-lg w-40 mb-4"></div>
-          
+         
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
@@ -78,7 +78,7 @@ export default function ShopPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F0F2F5] px-4 text-center">
         <span className="mb-4 text-4xl">🔌</span>
-        <h2 className="mb-2 text-xl font-bold text-slate-800">Ops, qualcosa è andato storto</h2>
+        <h2 className="mb-2 text-xl font-bold text-slate-800">Oups, une erreur est survenue</h2>
         <p className="text-slate-500">{error}</p>
       </div>
     );
@@ -87,10 +87,10 @@ export default function ShopPage() {
   // CONTENUTO REALE
   return (
     <div className="min-h-screen font-sans bg-[#F0F2F5] text-slate-900 pb-20">
-      
-      <ShopVetrina 
-        shop={shop} 
-        onOpenDetails={() => setShowDetails(true)} 
+     
+      <ShopVetrina
+        shop={shop}
+        onOpenDetails={() => setShowDetails(true)}
       />
 
       <main className="max-w-3xl px-4 mx-auto mt-6 md:px-8">
@@ -112,9 +112,9 @@ export default function ShopPage() {
 
       {/* POPUP DETTAGLI SALONE */}
       {showDetails && (
-        <ShopDettagli 
-          shop={shop} 
-          onClose={() => setShowDetails(false)} 
+        <ShopDettagli
+          shop={shop}
+          onClose={() => setShowDetails(false)}
         />
       )}
 

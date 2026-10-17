@@ -12,7 +12,7 @@ import ShopNegozio_ad from "../components_admin/ShopNegozio_ad.jsx";
 // IMPORTIAMO LA NUOVA PAGINA DI LOGIN
 import ShopLogin_ad from "../components_admin/ShopLogin_ad.jsx";
 
-const WEEKDAYS = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
 // ===== POPUP NELLO STILE DELLA PAGINA (al posto di alert / confirm / prompt del browser) =====
 let dialogSeq = 0;
@@ -33,7 +33,7 @@ function DialogCard({ dialog, onClose }) {
   const isError = isMessage && dialog.type === "error";
   const danger = isConfirm && dialog.danger !== false;
 
-  const title = dialog.title || (isSuccess ? "Fatto!" : "Qualcosa è andato storto");
+  const title = dialog.title || (isSuccess ? "Terminé !" : "Une erreur est survenue");
   const iconPath = isSuccess ? DIALOG_ICONS.success : isError ? DIALOG_ICONS.error : isConfirm ? DIALOG_ICONS.delete : DIALOG_ICONS.edit;
   const iconTone = isSuccess ? "bg-green-50 text-green-600" : (isError || danger) ? "bg-red-50 text-red-500" : "bg-neutral-100 text-neutral-900";
 
@@ -80,21 +80,21 @@ function DialogCard({ dialog, onClose }) {
               className="w-full px-4 py-2 font-medium text-neutral-900 placeholder-neutral-400 border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900"
             />
             <div className="flex gap-3 mt-5">
-              <button type="button" onClick={cancel} className={cancelBtn}>Annulla</button>
+              <button type="button" onClick={cancel} className={cancelBtn}>Annuler</button>
               <button type="submit" className="flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95">
-                {dialog.confirmLabel || "Salva"}
+                {dialog.confirmLabel || "Enregistrer"}
               </button>
             </div>
           </form>
         ) : isConfirm ? (
           <div className="flex gap-3 mt-6">
-            <button type="button" autoFocus={danger} onClick={cancel} className={cancelBtn}>{dialog.cancelLabel || "Annulla"}</button>
+            <button type="button" autoFocus={danger} onClick={cancel} className={cancelBtn}>{dialog.cancelLabel || "Annuler"}</button>
             <button
               type="button"
               onClick={() => onClose(true)}
               className={`flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl active:scale-95 ${danger ? "bg-red-500 hover:bg-red-600" : "bg-neutral-900 hover:bg-black"}`}
             >
-              {dialog.confirmLabel || "Conferma"}
+              {dialog.confirmLabel || "Confirmer"}
             </button>
           </div>
         ) : (
@@ -105,7 +105,7 @@ function DialogCard({ dialog, onClose }) {
               onClick={() => onClose(true)}
               className="w-full py-3 text-sm font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95"
             >
-              {isSuccess ? "Ok" : "Chiudi"}
+              {isSuccess ? "Ok" : "Fermer"}
             </button>
           </div>
         )}
@@ -163,9 +163,9 @@ export default function AdminDashboard() {
     setDialog(null);
   };
   const notify = (type, message, title) => openDialog({ kind: "message", type, message, title });
-  const askConfirm = (title, message, confirmLabel = "Conferma", danger = true, cancelLabel = "Annulla") =>
+  const askConfirm = (title, message, confirmLabel = "Confirmer", danger = true, cancelLabel = "Annuler") =>
     openDialog({ kind: "confirm", title, message, confirmLabel, danger, cancelLabel });
-  const askText = (title, message, initialValue = "", confirmLabel = "Salva") =>
+  const askText = (title, message, initialValue = "", confirmLabel = "Enregistrer") =>
     openDialog({ kind: "prompt", title, message, initialValue, confirmLabel });
 
   // Controllo del Token all'avvio
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
         setDraftShifts(barbersData[0].shifts || []);
       }
     } catch (err) {
-      setError("Errore di connessione al server.");
+      setError("Erreur de connexion au serveur.");
     } finally {
       setIsLoading(false);
     }
@@ -223,14 +223,14 @@ export default function AdminDashboard() {
 
   // --- FUNZIONI DI GESTIONE INVARIATE ---
   const handleDelete = async (appointmentId) => {
-    const conferma = await askConfirm("Annulla prenotazione", "Sei sicuro di annullare questa prenotazione?", "Sì, annulla", true, "Indietro");
+    const conferma = await askConfirm("Annuler la réservation", "Êtes-vous sûr de vouloir annuler cette réservation ?", "Oui, annuler", true, "Retour");
     if (!conferma) return;
     setIsDeleting(appointmentId);
     try {
       await deleteAdminBooking(appointmentId);
       setBookings(prev => prev.filter(b => b.id !== appointmentId));
     } catch (err) {
-      await notify("error", "Errore durante la cancellazione.");
+      await notify("error", "Erreur lors de l'annulation.");
     } finally {
       setIsDeleting(null);
     }
@@ -248,8 +248,8 @@ export default function AdminDashboard() {
 
   const handleAddShift = (weekday) => {
     const { start, end } = newShiftInputs[weekday];
-    if (!start || !end) return notify("error", "Inserisci sia l'orario di inizio che di fine.", "Orario mancante");
-    if (start >= end) return notify("error", "L'orario di fine deve essere successivo all'inizio.", "Orario non valido");
+    if (!start || !end) return notify("error", "Veuillez saisir l'heure de début et de fin.", "Horaire manquant");
+    if (start >= end) return notify("error", "L'heure de fin doit être postérieure à l'heure de début.", "Horaire invalide");
     const newShift = {
       barber_id: selectedBarber.id,
       weekday: weekday,
@@ -269,11 +269,11 @@ export default function AdminDashboard() {
     try {
       await updateBarberShifts(selectedBarber.id, draftShifts);
       setIsSavingShifts(false);
-      await notify("success", "Orari aggiornati con successo!");
+      await notify("success", "Horaires mis à jour avec succès !");
       await loadDashboardData();
     } catch (err) {
       setIsSavingShifts(false);
-      await notify("error", "Errore durante il salvataggio degli orari.");
+      await notify("error", "Erreur lors de l'enregistrement des horaires.");
     } finally {
       setIsSavingShifts(false);
     }
@@ -283,10 +283,10 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await updateShopDetails(activeShopId, shopForm);
-      await notify("success", "Informazioni negozio aggiornate con successo!");
+      await notify("success", "Informations du salon mises à jour avec succès !");
       await loadDashboardData();
     } catch (err) {
-      await notify("error", "Errore nell'aggiornamento del negozio.");
+      await notify("error", "Erreur lors de la mise à jour du salon.");
     }
   };
 
@@ -294,22 +294,22 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await createService(activeShopId, { ...newServiceForm, shop_id: activeShopId });
-      await notify("success", "Servizio aggiunto con successo!");
+      await notify("success", "Service ajouté avec succès !");
       setNewServiceForm({ name: "", description: "", duration_minutes: 30, price: 0 });
       await loadDashboardData();
     } catch (err) {
-      await notify("error", "Errore nell'aggiunta del servizio.");
+      await notify("error", "Erreur lors de l'ajout du service.");
     }
   };
 
   const handleDeleteService = async (serviceId) => {
-    if (!(await askConfirm("Elimina servizio", "Vuoi davvero eliminare questo servizio?", "Elimina"))) return;
+    if (!(await askConfirm("Supprimer le service", "Voulez-vous vraiment supprimer ce service ?", "Supprimer"))) return;
     try {
       await deleteService(serviceId);
       await loadDashboardData();
     } catch (err) {
       const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Errore durante l'eliminazione del servizio.");
+      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la suppression du service.");
     }
   };
 
@@ -321,7 +321,7 @@ export default function AdminDashboard() {
       return true;
     } catch (err) {
       const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Errore durante la modifica del servizio.");
+      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la modification du service.");
       return false;
     }
   };
@@ -331,32 +331,32 @@ export default function AdminDashboard() {
     if(!newBarberForm.name.trim()) return;
     try {
       await createBarber(activeShopId, { ...newBarberForm, shop_id: activeShopId });
-      await notify("success", "Collaboratore aggiunto con successo!");
+      await notify("success", "Collaborateur ajouté avec succès !");
       setNewBarberForm({ name: "" });
       await loadDashboardData();
     } catch (err) {
-      await notify("error", "Errore nell'aggiunta del collaboratore.");
+      await notify("error", "Erreur lors de l'ajout du collaborateur.");
     }
   };
 
   const handleUpdateBarber = async (barberId, currentName) => {
-    const newName = await askText("Modifica collaboratore", "Inserisci il nuovo nome del collaboratore:", currentName);
+    const newName = await askText("Modifier le collaborateur", "Saisissez le nouveau nom du collaborateur :", currentName);
     if (!newName || !newName.trim() || newName.trim() === currentName) return;
     try {
       await updateBarber(barberId, newName.trim());
       await loadDashboardData();
     } catch (err) {
-      await notify("error", "Errore durante la modifica del collaboratore.");
+      await notify("error", "Erreur lors de la modification du collaborateur.");
     }
   };
 
   const handleDeleteBarber = async (barberId) => {
-    if (!(await askConfirm("Elimina collaboratore", "Vuoi davvero eliminare questo collaboratore?", "Elimina"))) return;
+    if (!(await askConfirm("Supprimer le collaborateur", "Voulez-vous vraiment supprimer ce collaborateur ?", "Supprimer"))) return;
     try {
       await deleteBarber(barberId);
       await loadDashboardData();
     } catch (err) {
-      await notify("error", "Errore durante l'eliminazione del collaboratore.");
+      await notify("error", "Erreur lors de la suppression du collaborateur.");
     }
   };
 
@@ -380,7 +380,7 @@ export default function AdminDashboard() {
 
   // 2. Se siamo loggati ma i dati stanno caricando
   if (isLoading && bookings.length === 0) {
-    return <div className="flex items-center justify-center min-h-screen font-medium bg-[#F0F2F5] text-neutral-500">Caricamento pannello admin...</div>;
+    return <div className="flex items-center justify-center min-h-screen font-medium bg-[#F0F2F5] text-neutral-500">Chargement du panneau d'administration...</div>;
   }
 
   // 3. Se c'è un errore fatale nel caricamento dati
@@ -396,8 +396,8 @@ export default function AdminDashboard() {
         {/* Intestazione e Tasto Logout */}
         <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">Dashboard Salone</h1>
-            <p className="mt-1 font-medium text-neutral-500">Gestisci gli appuntamenti, il tuo team e le informazioni pubbliche.</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">Tableau de bord du salon</h1>
+            <p className="mt-1 font-medium text-neutral-500">Gérez les rendez-vous, votre équipe et les informations publiques.</p>
           </div>
           <button
             onClick={() => {
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
             }}
             className="px-4 py-2 text-sm font-bold text-red-600 transition-colors border border-red-200 rounded-xl hover:bg-red-50"
           >
-            Esci dall'Account
+            Se déconnecter
           </button>
         </div>
 
@@ -415,19 +415,19 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab("bookings")}
             className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'bookings' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}
           >
-            Appuntamenti
+            Rendez-vous
           </button>
           <button
             onClick={() => setActiveTab("shifts")}
             className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'shifts' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}
           >
-            Orari Team
+            Horaires de l'équipe
           </button>
           <button
             onClick={() => setActiveTab("shop")}
             className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'shop' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}
           >
-            Negozio e Servizi
+            Salon et Services
           </button>
         </div>
        

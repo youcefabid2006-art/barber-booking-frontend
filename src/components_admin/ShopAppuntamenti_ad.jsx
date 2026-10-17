@@ -13,7 +13,7 @@ export default function ShopAppuntamenti_ad({
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-end">
         <div className="flex items-center gap-4">
           <div className="flex flex-col">
-            <label className="mb-1 text-xs font-bold tracking-wide uppercase text-neutral-800">Seleziona Giorno</label>
+            <label className="mb-1 text-xs font-bold tracking-wide uppercase text-neutral-800">Sélectionner un jour</label>
             <input
               type="date"
               value={filterDate}
@@ -23,10 +23,10 @@ export default function ShopAppuntamenti_ad({
             />
           </div>
           <button onClick={() => setFilterDate("")} className="px-3 py-2 mt-5 text-sm font-bold transition-colors bg-white border rounded-xl border-neutral-200 text-neutral-600 hover:bg-neutral-100">
-            Tutti
+            Tous
           </button>
           <button className="px-5 py-2.5 mt-5 text-sm font-bold text-white transition-all shadow-md bg-gradient-to-r from-neutral-900 to-neutral-800 rounded-xl hover:from-black hover:to-neutral-900 active:scale-95">
-            + Nuova
+            + Nouvelle
           </button>
         </div>
       </div>
@@ -37,13 +37,13 @@ export default function ShopAppuntamenti_ad({
           {filteredBookings.length === 0 ? (
             <div className="p-12 text-center bg-white rounded-xl">
               <span className="block mb-2 text-3xl">📅</span>
-              <span className="font-medium text-neutral-500">Nessuna prenotazione per questa data.</span>
+              <span className="font-medium text-neutral-500">Aucune réservation pour cette date.</span>
             </div>
           ) : (
             filteredBookings.map((booking) => {
               const dataObj = new Date(booking.start_datetime);
-              const dataFormattata = dataObj.toLocaleDateString("it-IT", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
-              const oraFormattata = dataObj.toLocaleTimeString("it-IT", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
+              const dataFormattata = dataObj.toLocaleDateString("fr-FR", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
+              const oraFormattata = dataObj.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
               const nomeServizio = booking.service?.name || services.find((s) => s.id === booking.service_id)?.name || "-";
 
               return (
@@ -62,11 +62,11 @@ export default function ShopAppuntamenti_ad({
                           ? 'border-neutral-200 text-neutral-400 bg-neutral-100 cursor-not-allowed'
                           : 'border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 active:scale-95'}`}
                     >
-                      {isDeleting === booking.id ? 'Annullamento...' : 'Annulla'}
+                      {isDeleting === booking.id ? 'Annulation...' : 'Annuler'}
                     </button>
                   </div>
 
-                  <div className="flex items-start justify-between ml-1 text-sm">
+<div className="flex items-start justify-between ml-1 text-sm">
                     <div>
                       <p className="font-bold capitalize text-neutral-800">
                         {booking.customer_name} {booking.customer_surname}
@@ -75,13 +75,13 @@ export default function ShopAppuntamenti_ad({
                         {booking.customer_phone}
                       </p>
                       <p className="mt-2 text-xs font-bold text-neutral-700">
-                        <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 mr-1.5">Servizio:</span>
+                        <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 mr-1.5">Service :</span>
                         {nomeServizio}
                       </p>
                     </div>
                     <div className="font-bold text-right text-neutral-900">
-                      <span className="block text-[10px] font-bold tracking-wider uppercase text-neutral-400">Barbiere</span>
-                      {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-0.5 text-xs uppercase tracking-wider bg-neutral-100 text-neutral-600 rounded-md">Qualsiasi</span>}
+                      <span className="block text-[10px] font-bold tracking-wider uppercase text-neutral-400">Barbier</span>
+                      {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-0.5 text-xs uppercase tracking-wider bg-neutral-100 text-neutral-600 rounded-md">Indifférent</span>}
                     </div>
                   </div>
                 </div>
@@ -95,12 +95,12 @@ export default function ShopAppuntamenti_ad({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200">
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Data e Ora</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Cliente</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Telefono</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Servizio</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Barbiere</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap text-right">Azioni</th>
+                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Date et heure</th>
+                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Client</th>
+                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Téléphone</th>
+                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Service</th>
+                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap">Barbier</th>
+                <th className="p-4 text-xs font-bold tracking-wider uppercase text-neutral-800 whitespace-nowrap text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -108,17 +108,17 @@ export default function ShopAppuntamenti_ad({
                 <tr>
                   <td colSpan="6" className="p-12 text-center">
                     <span className="block mb-2 text-3xl">📅</span>
-                    <span className="font-medium text-neutral-500">Nessuna prenotazione per questa data.</span>
+                    <span className="font-medium text-neutral-500">Aucune réservation pour cette date.</span>
                   </td>
                 </tr>
               ) : (
                 filteredBookings.map((booking) => {
                   const dataObj = new Date(booking.start_datetime);
-                  const dataFormattata = dataObj.toLocaleDateString("it-IT", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
-                  const oraFormattata = dataObj.toLocaleTimeString("it-IT", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
+                  const dataFormattata = dataObj.toLocaleDateString("fr-FR", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
+                  const oraFormattata = dataObj.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
                   const nomeServizio = booking.service?.name || services.find((s) => s.id === booking.service_id)?.name || "-";
 
-                  return (
+return (
                     <tr key={booking.id} className="transition-colors border-b-2 border-neutral-200/80 hover:bg-neutral-50 group">
                       <td className="p-4 font-medium text-neutral-900 whitespace-nowrap">
                         {dataFormattata} <span className="ml-2 font-bold text-neutral-600">{oraFormattata}</span>
@@ -133,7 +133,7 @@ export default function ShopAppuntamenti_ad({
                         {nomeServizio}
                       </td>
                       <td className="p-4 font-bold text-neutral-900 whitespace-nowrap">
-                        {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-1 text-xs uppercase tracking-wider bg-neutral-100 text-neutral-600 rounded-md">Qualsiasi</span>}
+                        {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-1 text-xs uppercase tracking-wider bg-neutral-100 text-neutral-600 rounded-md">Indifférent</span>}
                       </td>
                       <td className="p-4 text-right whitespace-nowrap">
                         <button
@@ -144,7 +144,7 @@ export default function ShopAppuntamenti_ad({
                               ? 'border-neutral-200 text-neutral-400 bg-neutral-100 cursor-not-allowed'
                               : 'border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 active:scale-95'}`}
                         >
-                          {isDeleting === booking.id ? 'Annullamento...' : 'Annulla'}
+                          {isDeleting === booking.id ? 'Annulation...' : 'Annuler'}
                         </button>
                       </td>
                     </tr>

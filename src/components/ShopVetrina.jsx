@@ -61,7 +61,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
         <div className="w-full h-64 md:h-[400px] relative">
           <img
             src={coverImage}
-            alt={`Vetrina di ${shop.name}`}
+            alt={`Vitrine de ${shop.name}`}
             className="object-cover w-full h-full"
           />
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent"></div>
@@ -86,7 +86,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span className="leading-tight font-medium text-[15px]">
-                  {shop.address ? shop.address : "Indirizzo non impostato"}
+                  {shop.address ? shop.address : "Adresse non renseignée"}
                 </span>
               </a>
 
@@ -98,7 +98,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <span className="leading-tight font-medium text-[15px]">
-                  {shop.phone ? shop.phone : "Telefono non impostato"}
+                  {shop.phone ? shop.phone : "Téléphone non renseigné"}
                 </span>
               </a>
             </div>
@@ -136,7 +136,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                   </a>
                 )}
 
-                {shop.whatsapp_number && shop.whatsapp_number.trim() !== "" && (
+{shop.whatsapp_number && shop.whatsapp_number.trim() !== "" && (
                   <a
                     href={`https://wa.me/${shop.whatsapp_number}`}
                     target="_blank"
@@ -157,7 +157,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
               onClick={onOpenDetails}
               className="flex items-center justify-between w-full p-4 transition-all shadow-md rounded-xl bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98] group"
             >
-              <span className="font-bold text-white text-[15px]">Visualizza dettagli salone</span>
+              <span className="font-bold text-white text-[15px]">Voir les détails du salon</span>
               <svg className="w-5 h-5 transition-colors text-neutral-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
@@ -179,10 +179,10 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
             <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <span className="text-[10px] font-bold tracking-wide uppercase">Home</span>
+            <span className="text-[10px] font-bold tracking-wide uppercase">Accueil</span>
           </button>
 
-          {/* Tasto PRENOTAZIONI */}
+{/* Tasto PRENOTAZIONI */}
           <button
             onClick={() => setShowPrenotazioni(true)}
             className="flex flex-col items-center justify-center p-2 transition-colors text-slate-400 hover:text-neutral-900 group"
@@ -190,7 +190,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
             <svg className="w-6 h-6 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="text-[10px] font-bold tracking-wide uppercase">Prenotazioni</span>
+            <span className="text-[10px] font-bold tracking-wide uppercase">Réservations</span>
           </button>
 
           {/* Tasto IMPOSTAZIONI (Visibile SOLO all'Admin) */}
@@ -203,7 +203,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-[10px] font-bold tracking-wide uppercase">Impostazioni</span>
+              <span className="text-[10px] font-bold tracking-wide uppercase">Paramètres</span>
             </button>
           )}
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-const WEEKDAYS = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const getInitials = (name) => name.substring(0, 2).toUpperCase();
 
 // ===== SELETTORE ORARIO (sostituisce <input type="time">) =====
@@ -64,7 +64,7 @@ function TimeField({ value, onChange, title }) {
 
         <div className="grid grid-cols-2 gap-3 mt-5">
           <div>
-            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-neutral-400">Ore</div>
+            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-neutral-400">Heures</div>
             <div ref={hoursRef} className="relative h-64 p-1.5 space-y-1 overflow-y-auto overscroll-contain rounded-2xl bg-neutral-50">
               {HOURS.map((h) => (
                 <button
@@ -80,8 +80,8 @@ function TimeField({ value, onChange, title }) {
             </div>
           </div>
 
-          <div>
-            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-neutral-400">Minuti</div>
+<div>
+            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-neutral-400">Minutes</div>
             <div ref={minutesRef} className="relative h-64 p-1.5 space-y-1 overflow-y-auto overscroll-contain rounded-2xl bg-neutral-50">
               {MINUTES.map((m) => (
                 <button
@@ -104,14 +104,14 @@ function TimeField({ value, onChange, title }) {
             onClick={() => setOpen(false)}
             className="flex-1 py-3 text-base font-bold transition-colors rounded-xl text-neutral-700 bg-neutral-100 hover:bg-neutral-200"
           >
-            Annulla
+            Annuler
           </button>
           <button
             type="button"
             onClick={confirm}
             className="flex-1 py-3 text-base font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95"
           >
-            Conferma
+            Confirmer
           </button>
         </div>
       </div>
@@ -169,8 +169,8 @@ export default function ShopTeam_ad({
         ))}
       </div>
 
-      <div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
-        <h3 className="mb-6 text-lg font-extrabold text-neutral-900">Calendario di {selectedBarber.name}</h3>
+<div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
+        <h3 className="mb-6 text-lg font-extrabold text-neutral-900">Calendrier de {selectedBarber.name}</h3>
        
         <div className="flex flex-col">
           {WEEKDAYS.map((dayName, dayIndex) => {
@@ -182,7 +182,7 @@ export default function ShopTeam_ad({
                
                 <div className="flex flex-wrap flex-1 gap-2">
                   {dayShifts.length === 0 ? (
-                    <span className="px-3 py-1.5 text-sm font-bold text-neutral-400 bg-neutral-50 rounded-lg">Riposo</span>
+                    <span className="px-3 py-1.5 text-sm font-bold text-neutral-400 bg-neutral-50 rounded-lg">Repos</span>
                   ) : (
                     dayShifts.map((shift) => {
                       const realIndex = draftShifts.findIndex(s => s === shift);
@@ -200,13 +200,13 @@ export default function ShopTeam_ad({
 
 <div className="flex items-center gap-2">
                   <TimeField
-                    title="Orario di inizio"
+                    title="Heure de début"
                     value={newShiftInputs[dayIndex].start}
                     onChange={(v) => setNewShiftInputs({...newShiftInputs, [dayIndex]: {...newShiftInputs[dayIndex], start: v}})}
                   />
                   <span className="font-bold text-neutral-400">-</span>
                   <TimeField
-                    title="Orario di fine"
+                    title="Heure de fin"
                     value={newShiftInputs[dayIndex].end}
                     onChange={(v) => setNewShiftInputs({...newShiftInputs, [dayIndex]: {...newShiftInputs[dayIndex], end: v}})}
                   />
@@ -231,7 +231,7 @@ export default function ShopTeam_ad({
                 ? 'bg-neutral-400 cursor-not-allowed'
                 : 'bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98]'}`}
           >
-            {isSavingShifts ? 'Salvataggio in corso...' : 'Salva Orari Team'}
+            {isSavingShifts ? 'Enregistrement en cours...' : "Enregistrer les horaires de l'équipe"}
           </button>
         </div>
       </div>

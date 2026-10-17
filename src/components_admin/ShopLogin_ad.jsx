@@ -30,7 +30,7 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
         // ROTTA DI SETUP (Creazione prima password)
         // Usiamo un ID fittizio 1 per ora, nel sistema reale lo ricaveremo dal backend
         await axios.post(`${API_BASE}/admin/shops/1/setup-password`, { password });
-        alert("Password creata con successo! Ora fai il login.");
+        alert("Mot de passe créé avec succès ! Vous pouvez maintenant vous connecter.");
         setHasPassword(true);
         setIsSetupMode(false);
         setPassword("");
@@ -50,11 +50,11 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
       }
     } catch (err) {
       if (err.response?.status === 400 && isSetupMode) {
-        setError("Il negozio ha già una password impostata.");
+        setError("Le salon a déjà un mot de passe défini.");
         setHasPassword(true);
         setIsSetupMode(false);
       } else {
-        setError("Credenziali non valide. Riprova.");
+        setError("Identifiants invalides. Veuillez réessayer.");
       }
     } finally {
       setIsLoading(false);
@@ -72,10 +72,10 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
             </svg>
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900">
-            Area Riservata
+            Espace réservé
           </h2>
           <p className="mt-2 text-sm font-medium text-neutral-500">
-            {isSetupMode ? "Imposta la master password del salone" : "Inserisci la password per accedere"}
+            {isSetupMode ? "Définissez le mot de passe principal du salon" : "Saisissez le mot de passe pour accéder"}
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
             <label className="block mb-1.5 text-xs font-bold tracking-wide uppercase text-neutral-800">
-              Negozio
+              Salon
             </label>
             <input
               type="text"
@@ -98,9 +98,9 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
             />
           </div>
 
-          <div>
+<div>
             <label className="block mb-1.5 text-xs font-bold tracking-wide uppercase text-neutral-800">
-              Password
+              Mot de passe
             </label>
             <input
               type="password"
@@ -118,7 +118,7 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
             className={`w-full py-3.5 mt-2 text-[15px] font-bold text-white transition-all shadow-md rounded-xl
               ${isLoading ? 'bg-neutral-400 cursor-not-allowed' : 'bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98]'}`}
           >
-            {isLoading ? 'Attendere...' : (isSetupMode ? 'Imposta Password' : 'Accedi')}
+            {isLoading ? 'Veuillez patienter...' : (isSetupMode ? 'Définir le mot de passe' : 'Se connecter')}
           </button>
         </form>
 
@@ -129,7 +129,7 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
               onClick={() => setIsSetupMode(!isSetupMode)}
               className="text-xs font-bold transition-colors text-neutral-400 hover:text-neutral-900"
             >
-              {isSetupMode ? "Torna al Login" : "Prima volta? Imposta password"}
+              {isSetupMode ? "Retour à la connexion" : "Première fois ? Définir le mot de passe"}
             </button>
           </div>
         )}

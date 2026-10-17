@@ -13,7 +13,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
       try {
         setIsLoading(true);
         const data = await getUserBookings(shopId);
-        
+       
         // Ordiniamo dalla più recente alla più vecchia per comodità visiva
         const sortedData = data.sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime));
         setBookings(sortedData);
@@ -23,7 +23,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
         setIsLoading(false);
       }
     }
-    
+   
     if (shopId) {
       fetchMyBookings();
     }
@@ -31,16 +31,16 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-50">
-      
+     
       {/* HEADER STICKY */}
       <div className="sticky top-0 z-10 flex items-center justify-center p-5 bg-white border-b border-neutral-200 shadow-sm shrink-0">
-        <h2 className="text-xl font-extrabold tracking-tight text-neutral-900">Le tue prenotazioni</h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-neutral-900">Vos réservations</h2>
       </div>
 
       {/* CONTENUTO DELLA PAGINA */}
       <div className="flex-1 w-full overflow-y-auto pb-28 animate-fade-up">
         <div className="w-full max-w-xl px-4 py-6 mx-auto">
-        
+       
         {isLoading ? (
           // SKELETON LOADER (Effetto caricamento Premium)
           <div className="flex flex-col gap-4">
@@ -56,9 +56,9 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="mb-2 text-2xl font-bold text-slate-900">Nessun appuntamento</h3>
+            <h3 className="mb-2 text-2xl font-bold text-slate-900">Aucun rendez-vous</h3>
             <p className="max-w-xs text-[15px] leading-relaxed text-slate-500">
-              Non hai ancora effettuato prenotazioni presso questo salone.
+              Vous n'avez pas encore effectué de réservation dans ce salon.
             </p>
           </div>
         ) : (
@@ -66,10 +66,10 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
           <div className="flex flex-col gap-4">
             {bookings.map((booking) => {
               const dataObj = new Date(booking.start_datetime);
-              const giornoNome = dataObj.toLocaleDateString("it-IT", { weekday: "long", timeZone: "Africa/Algiers" });
-              const giornoNumero = dataObj.toLocaleDateString("it-IT", { day: "numeric", month: "long", timeZone: "Africa/Algiers" });
-              const ora = dataObj.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Algiers" });
-              
+              const giornoNome = dataObj.toLocaleDateString("fr-FR", { weekday: "long", timeZone: "Africa/Algiers" });
+              const giornoNumero = dataObj.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Africa/Algiers" });
+              const ora = dataObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Algiers" });
+             
               return (
                 <div
                   key={booking.id}
@@ -78,7 +78,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                   {/* Bordo decorativo laterale (Opzionale, dà un tocco di classe) */}
                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-neutral-900"></div>
 
-                  <div className="flex items-start justify-between mb-4 border-b border-slate-100 pb-4 ml-2">
+<div className="flex items-start justify-between mb-4 border-b border-slate-100 pb-4 ml-2">
                     <div>
                       <p className="text-xs font-bold tracking-wide uppercase text-slate-400 mb-1 capitalize">
                         {giornoNome}, {giornoNumero}
@@ -87,12 +87,12 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                     </div>
                     {/* Badge di stato */}
                     <div className="px-3 py-1 text-[10px] font-bold tracking-wider uppercase bg-green-50 border border-green-100 text-green-600 rounded-lg">
-                      Confermato
+                      Confirmé
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-3 ml-2">
-                    
+                   
                     {/* Info Cliente (Temporaneo, visibile finché non ci sarà il login personale) */}
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 text-slate-400">
@@ -101,7 +101,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Prenotato a nome di</p>
+                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Réservé au nom de</p>
                         <p className="text-sm font-bold text-slate-800 capitalize">{booking.customer_name} {booking.customer_surname}</p>
                       </div>
                     </div>
@@ -114,9 +114,9 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Con chi</p>
+                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Avec qui</p>
                         <p className="text-sm font-bold text-slate-800">
-                          {booking.barber ? booking.barber.name : "Qualsiasi collaboratore"}
+                          {booking.barber ? booking.barber.name : "N'importe quel collaborateur"}
                         </p>
                       </div>
                     </div>
@@ -129,7 +129,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Servizio</p>
+                        <p className="text-[11px] font-bold tracking-wide uppercase text-slate-400">Service</p>
                         <p className="text-sm font-bold text-slate-800">
                           {services.find((s) => s.id === booking.service_id)?.name || "-"}
                         </p>
@@ -145,10 +145,10 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
         </div>
       </div>
 
-      {/* BOTTOM NAVIGATION BAR */}
+{/* BOTTOM NAVIGATION BAR */}
       <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
         <div className={`${isAdminAuth ? "grid grid-cols-3 items-center justify-items-center" : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
-          
+         
           <button
             onClick={onHome}
             className="flex flex-col items-center justify-center p-2 transition-colors text-slate-400 hover:text-neutral-900 group"
@@ -156,7 +156,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
             <svg className="w-6 h-6 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <span className="text-[10px] font-bold tracking-wide uppercase">Home</span>
+            <span className="text-[10px] font-bold tracking-wide uppercase">Accueil</span>
           </button>
 
           <button
@@ -165,7 +165,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
             <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="text-[10px] font-bold tracking-wide uppercase">Prenotazioni</span>
+            <span className="text-[10px] font-bold tracking-wide uppercase">Réservations</span>
           </button>
           {/* Tasto IMPOSTAZIONI (Visibile SOLO all'Admin) */}
           {isAdminAuth && (
@@ -177,7 +177,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-[10px] font-bold tracking-wide uppercase">Impostazioni</span>
+              <span className="text-[10px] font-bold tracking-wide uppercase">Paramètres</span>
             </button>
           )}
 

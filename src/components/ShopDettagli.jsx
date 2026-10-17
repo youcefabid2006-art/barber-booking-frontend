@@ -8,28 +8,28 @@ export default function ShopDettagli({ shop, onClose }) {
   // MAPPATURA LINGUA: Dal DB (Inglese neutrale) -> allo Schermo (Italiano)
   // In futuro, potrai creare una mappa simile per l'Arabo/Darija
   const mappaGiorni = [
-    { dbKey: "Monday", display: "Lunedì" },
-    { dbKey: "Tuesday", display: "Martedì" },
-    { dbKey: "Wednesday", display: "Mercoledì" },
-    { dbKey: "Thursday", display: "Giovedì" },
-    { dbKey: "Friday", display: "Venerdì" },
-    { dbKey: "Saturday", display: "Sabato" },
-    { dbKey: "Sunday", display: "Domenica" }
+    { dbKey: "Monday", display: "Lundi" },
+    { dbKey: "Tuesday", display: "Mardi" },
+    { dbKey: "Wednesday", display: "Mercredi" },
+    { dbKey: "Thursday", display: "Jeudi" },
+    { dbKey: "Friday", display: "Vendredi" },
+    { dbKey: "Saturday", display: "Samedi" },
+    { dbKey: "Sunday", display: "Dimanche" }
   ];
 
   // Generazione dinamica degli orari dal database
   const orari = mappaGiorni.map(({ dbKey, display }) => {
     // 1. Cerca la chiave in inglese (es. "Monday") nel JSON
     const orarioStringa = shop.opening_hours ? shop.opening_hours[dbKey] : null;
-    
+   
     // 2. Capiamo se è chiuso (Accetta "Closed" come standard internazionale, o "Chiuso" per sicurezza)
     // Ripristinati i simboli || (OR) che si erano persi
-    const isClosed = !orarioStringa || orarioStringa.toLowerCase().includes("closed") || orarioStringa.toLowerCase().includes("chius");
-    
+    const isClosed = !orarioStringa || orarioStringa.toLowerCase().includes("closed") || orarioStringa.toLowerCase().includes("chius") || orarioStringa.toLowerCase().includes("ferm");
+   
     // 3. Traduciamo la parola "Closed" in "Chiuso" per l'utente finale
     let stringaVisualizzata = orarioStringa;
     if (isClosed) {
-      stringaVisualizzata = "Chiuso"; // In futuro qui metterai la variabile di traduzione araba
+      stringaVisualizzata = "Fermé"; // In futuro qui metterai la variabile di traduzione araba
     }
 
     return {
@@ -41,7 +41,7 @@ export default function ShopDettagli({ shop, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white animate-fade-up">
-      
+     
       {/* HEADER STICKY CON FRECCIA INDIETRO */}
       <div className="sticky top-0 z-10 flex items-center p-4 bg-white border-b border-neutral-200">
         <button onClick={onClose} className="p-2 mr-2 transition rounded-full text-neutral-600 hover:bg-neutral-100">
@@ -49,52 +49,48 @@ export default function ShopDettagli({ shop, onClose }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
         </button>
-        <h2 className="text-lg font-bold tracking-tight text-neutral-900">Dettagli del salone</h2>
+        <h2 className="text-lg font-bold tracking-tight text-neutral-900">Détails du salon</h2>
       </div>
 
       <div className="w-full max-w-3xl flex-1 p-5 mx-auto">
-        
+       
         {/* INDIRIZZO */}
         <div className="flex items-start justify-between pb-6 mb-8 border-b border-neutral-200">
           {/* Indirizzo diventato cliccabile */}
-          <a 
-            href={`https://maps.google.com/?q=${shop.address}`} 
-            target="_blank" 
-            rel="noreferrer" 
+          <a
+            href={`https://maps.google.com/?q=${shop.address}`}
+            target="_blank"
+            rel="noreferrer"
             className="text-[15px] leading-relaxed text-neutral-600 hover:text-neutral-900 transition-colors"
           >
             {shop.address}<br />
-            
+           
           </a>
           <a href={`https://maps.google.com/?q=${shop.address}`} target="_blank" rel="noreferrer" className="text-sm font-bold transition-colors text-neutral-900 hover:text-black hover:underline">
-            Mappa
+            Carte
           </a>
         </div>
 
-        {/* RECAPITI (NUOVA SEZIONE) */}
+{/* RECAPITI (NUOVA SEZIONE) */}
         <div className="pb-6 mb-8 border-b border-neutral-200">
-          <h3 className="mb-4 text-lg font-bold text-neutral-900">Recapiti</h3>
+          <h3 className="mb-4 text-lg font-bold text-neutral-900">Coordonnées</h3>
           <div className="flex flex-col gap-3 text-[15px]">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-neutral-800">Tel:</span>
+              <span className="font-bold text-neutral-800">Tél :</span>
               {shop.phone ? (
                 <a href={`tel:${shop.phone}`} className="text-neutral-600 transition-colors hover:text-neutral-900 hover:underline">
                   {shop.phone}
                 </a>
               ) : (
-                <span className="text-neutral-400">Non impostato</span>
+                <span className="text-neutral-400">Non renseigné</span>
               )}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-neutral-800">Email:</span>
-              <span className="text-neutral-400">Non disponibile</span>
             </div>
           </div>
         </div>
 
         {/* IL TEAM */}
         <div className="pb-6 mb-8 border-b border-neutral-200">
-          <h3 className="mb-6 text-lg font-bold text-neutral-900">Il team</h3>
+          <h3 className="mb-6 text-lg font-bold text-neutral-900">L'équipe</h3>
           <div className="flex gap-6 overflow-x-auto hide-scrollbar">
             {shop.barbers && shop.barbers.map((barber) => (
               <div key={barber.id} className="flex flex-col items-center min-w-[80px]">
@@ -103,7 +99,7 @@ export default function ShopDettagli({ shop, onClose }) {
                 </div>
                 <span className="font-bold text-neutral-800">{barber.name}</span>
                 <button className="px-5 py-1.5 mt-3 text-sm font-bold transition-colors border-2 rounded-lg border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white">
-                  Vedi
+                  Voir
                 </button>
               </div>
             ))}
@@ -112,7 +108,7 @@ export default function ShopDettagli({ shop, onClose }) {
 
         {/* ORARI DI APERTURA (Internazionalizzati) */}
         <div className="pb-6 mb-8 border-b border-neutral-200">
-          <h3 className="mb-5 text-lg font-bold text-neutral-900">Orari di apertura</h3>
+          <h3 className="mb-5 text-lg font-bold text-neutral-900">Horaires d'ouverture</h3>
           <div className="flex flex-col gap-3 text-[15px]">
             {orari.map((o, idx) => (
               <div key={idx} className="flex items-center justify-between">
@@ -132,11 +128,11 @@ export default function ShopDettagli({ shop, onClose }) {
 
         {/* DESCRIZIONE */}
         <div className="mb-10">
-          <h3 className="mb-4 text-lg font-bold text-neutral-900">Descrizione</h3>
+          <h3 className="mb-4 text-lg font-bold text-neutral-900">Description</h3>
           <p className="text-[15px] leading-relaxed text-justify text-neutral-600 whitespace-pre-wrap">
             {shop.description
               ? shop.description
-              : `Benvenuti in ${shop.name}. Il nostro salone nasce dall'idea di portare un'atmosfera intima e rilassante, unendo la tradizione della barberia classica alle tecniche più moderne. Offriamo servizi di eccellenza e trattamenti specifici.`
+              : `Bienvenue chez ${shop.name}. Notre salon est né de l'idée d'offrir une atmosphère intime et relaxante, alliant la tradition du barbier classique aux techniques les plus modernes. Nous proposons des services d'excellence et des soins spécifiques.`
             }
           </p>
         </div>
