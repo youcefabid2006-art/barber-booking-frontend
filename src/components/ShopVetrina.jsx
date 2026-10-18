@@ -21,14 +21,15 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
   const [isAdminAuth, setIsAdminAuth] = useState(false);
   const navigate = useNavigate();
 
-  // Controllo di sicurezza: verifichiamo se l'utente è l'admin di QUESTO specifico negozio
+    // Controllo di sicurezza: verifichiamo se l'utente è l'admin di QUESTO specifico negozio
+  // (solo comodità grafica: la vera protezione è nel backend, che controlla il token ad ogni richiesta)
   useEffect(() => {
-    if (shop && shop.slug) {
+    if (shop && shop.id) {
       const token = localStorage.getItem("admin_token");
       if (token) {
         const decoded = parseJwt(token);
-        // Se il "sub" del token (lo slug salvato) combacia con lo slug del negozio visualizzato
-        if (decoded && decoded.sub === shop.slug) {
+        // Se il "sub" del token (l'id del negozio) combacia con l'id del negozio visualizzato
+        if (decoded && String(decoded.sub) === String(shop.id)) {
           setIsAdminAuth(true);
         }
       }

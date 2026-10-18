@@ -25,9 +25,37 @@ axios.interceptors.request.use(
   }
 );
 
+// NUOVO: se una rotta admin risponde 401 (token scaduto, o token vecchio dopo un aggiornamento di sicurezza)
+// eliminiamo il token e ricarichiamo la pagina: AdminDash non trova più il token e mostra il login.
+// Il login stesso è escluso (lì un 401 significa solo "password sbagliata").
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url = error?.config?.url || "";
+    if (error?.response?.status === 401 && url.includes("/admin/") && !url.includes("/admin/login")) {
+      localStorage.removeItem("admin_token");
+      window.location.reload();
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ==========================================
 // ROTTE PUBBLICHE (VETRINA E PRENOTAZIONI) - NESSUN TOKEN RICHIESTO
 // ==========================================
+
+// Le prenotazioni del cliente si salvano come [{ id, token }]: il token lo genera il server
+// alla prenotazione e dimostra che la prenotazione è davvero sua (l'id da solo non basta).
+const MY_BOOKINGS_KEY = "my_bookings";
+
+function readMyBookings() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(MY_BOOKINGS_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((b) => b && b.id && b.token) : [];
+  } catch (e) {
+    return [];
+  }
+}
 
 export async function getShopBySlug(slug) {
   const { data } = await axios.get(`${API_BASE}/shops/${slug}`);
@@ -45,41 +73,32 @@ export async function createBooking(phoneNumber, otpCode) {
     phone_number: phoneNumber,
     otp_code: otpCode
   });
-  if (data && data.id) {
-    const savedIds = JSON.parse(localStorage.getItem("my_booking_ids") || "[]");
-    if (!savedIds.includes(data.id)) {
-      savedIds.push(data.id);
-      localStorage.setItem("my_booking_ids", JSON.stringify(savedIds));
-    }
+  if (data && data.id && data.manage_token) {
+    const saved = readMyBookings().filter((b) => b.id !== data.id);
+    saved.push({ id: data.id, token: data.manage_token });
+    localStorage.setItem(MY_BOOKINGS_KEY, JSON.stringify(saved));
   }
   return data;
 }
 
 export async function getUserBookings(shopId) {
-  const savedIds = JSON.parse(localStorage.getItem("my_booking_ids") || "[]");
-  if (!savedIds.length) return [];
-  const { data } = await axios.get(`${API_BASE}/shops/${shopId}/my-bookings?ids=${savedIds.join(",")}`);
+  // Vecchio formato (solo id, senza token): non è più valido, lo eliminiamo
+  localStorage.removeItem("my_booking_ids");
+
+  // Massimo 50 per richiesta (limite del server): prendiamo le più recenti
+  const saved = readMyBookings().slice(-50);
+  if (!saved.length) return [];
+  // POST: i token non finiscono nell'URL (e quindi nemmeno nei log)
+  const { data } = await axios.post(`${API_BASE}/shops/${shopId}/my-bookings`, { items: saved });
   return data;
 }
 
+// UNICA rotta per gli orari (ha sostituito getAvailability e getAvailabilityDetailed).
+// Restituisce anche gli orari NON prenotabili con questo servizio (available: false) per mostrarli sbiaditi.
 export async function getAvailability(shopId, serviceId, date, barberId = null) {
-  // Costruiamo l'URL base con i parametri obbligatori
   let url = `${API_BASE}/availability?shop_id=${shopId}&service_id=${serviceId}&date=${date}`;
- 
+
   // Se è stato scelto un barbiere specifico, aggiungiamo il parametro
-  if (barberId && barberId !== "any") {
-    url += `&barber_id=${barberId}`;
-  }
-
-  const { data } = await axios.get(url);
-  return data; // Ritorna l'array di orari (es. ["10:00", "10:30"])
-}
-
-// NUOVA: come getAvailability, ma restituisce anche gli orari NON prenotabili con questo servizio
-// (available: false) per mostrarli sbiaditi. Usata da ShopBooking.
-export async function getAvailabilityDetailed(shopId, serviceId, date, barberId = null) {
-  let url = `${API_BASE}/availability/detailed?shop_id=${shopId}&service_id=${serviceId}&date=${date}`;
-
   if (barberId && barberId !== "any") {
     url += `&barber_id=${barberId}`;
   }

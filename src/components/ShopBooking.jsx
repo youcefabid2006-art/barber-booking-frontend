@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAvailabilityDetailed, createBooking, requestOtp } from "../api";
+import { getAvailability, createBooking, requestOtp } from "../api";
 
 // --- FUNZIONE DI SUPPORTO PER GENERARE I PROSSIMI 14 GIORNI (DINAMICA) ---
 // RIPRISTINATA ESATTAMENTE COME NELLA VERSIONE ORIGINALE
@@ -52,6 +52,18 @@ function isSlotUnavailableError(error) {
   return error?.response?.status === 400 && detail.includes("time slot");
 }
 
+// NUOVO: il backend, per gli errori di sicurezza (codice sbagliato o scaduto, troppi tentativi,
+// troppe richieste di codice, limiti di prenotazione, telefono non valido), risponde con
+// detail = { code, message } dove message è già in francese e pronto da mostrare al cliente.
+// Restituisce { code, message } oppure null se l'errore è di un altro tipo (es. rete assente).
+function getApiError(error) {
+  const detail = error?.response?.data?.detail;
+  if (detail && typeof detail === "object" && typeof detail.message === "string") {
+    return { code: detail.code, message: detail.message };
+  }
+  return null;
+}
+
 export default function ShopBooking({ shopId, service, barbers, onClose }) {
   const [step, setStep] = useState(1);
   const [selectedBarber, setSelectedBarber] = useState(null);
@@ -99,7 +111,7 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
 async function fetchSlots() {
         setIsLoadingSlots(true);
         try {
-          const slots = await getAvailabilityDetailed(shopId, service.id, selectedDate, selectedBarber);
+          const slots = await getAvailability(shopId, service.id, selectedDate, selectedBarber);
           if (isMounted) {
             setAvailableSlots(slots);
           }
@@ -194,7 +206,11 @@ async function fetchSlots() {
         setSelectedTime(null);
         setStep(2);
       } else {
-        alert("Un problème de connexion est survenu. Veuillez réessayer.");
+        // NUOVO: se il backend ha un messaggio per il cliente (troppe richieste, numero bloccato,
+        // limite di prenotazioni, telefono non valido...) lo mostriamo; si resta sullo step 3
+        // così il cliente può correggere i dati.
+        const apiError = getApiError(error);
+        alert(apiError?.message || "Un problème de connexion est survenu. Veuillez réessayer.");
       }
     } finally {
       setIsSubmitting(false);
@@ -218,8 +234,17 @@ async function fetchSlots() {
         setOtpCode("");
         setStep(2);
       } else {
-        alert("Le code saisi n'est pas valide ou a expiré. Veuillez réessayer.");
+        // NUOVO: messaggio del backend (es. "Il vous reste 3 tentatives", "Code expiré",
+        // "Trop de codes erronés. Réessayez dans 10 minutes.").
+        // Solo se il codice è semplicemente sbagliato si resta sullo step 4;
+        // negli altri casi (codice scaduto, numero bloccato, limiti) il codice non è più valido
+        // e si torna allo step 3.
+        const apiError = getApiError(error);
+        alert(apiError?.message || "Le code saisi n'est pas valide ou a expiré. Veuillez réessayer.");
         setOtpCode("");
+        if (apiError && apiError.code !== "otp_invalid") {
+          setStep(3);
+        }
       }
     } finally {
       setIsSubmitting(false);

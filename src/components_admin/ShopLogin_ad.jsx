@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
 // Assicurati che l'API_BASE punti al tuo backend FastAPI
@@ -6,19 +6,12 @@ const API_BASE = import.meta.env.DEV
   ? "http://localhost:8000/api/v1"
   : "https://barber-booking-backend-sxus.onrender.com/api/v1";
 
+// NOTA: la prima password del salone non si imposta più da questa pagina:
+// la rotta setup-password ora richiede la chiave master (la imposti tu da Swagger in locale).
 export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
   const [password, setPassword] = useState("");
-  const [isSetupMode, setIsSetupMode] = useState(false); // Se vero, crea la prima password
-  const [hasPassword, setHasPassword] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    axios
-      .get(`${API_BASE}/admin/shops/1/password-status`)
-      .then((res) => setHasPassword(res.data.has_password))
-      .catch(() => {});
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,36 +19,20 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
     setIsLoading(true);
 
     try {
-      if (isSetupMode) {
-        // ROTTA DI SETUP (Creazione prima password)
-        // Usiamo un ID fittizio 1 per ora, nel sistema reale lo ricaveremo dal backend
-        await axios.post(`${API_BASE}/admin/shops/1/setup-password`, { password });
-        alert("Mot de passe créé avec succès ! Vous pouvez maintenant vous connecter.");
-        setHasPassword(true);
-        setIsSetupMode(false);
-        setPassword("");
-      } else {
-        // ROTTA DI LOGIN CLASSICO (Restituisce il JWT Token)
-        const params = new URLSearchParams();
-        params.append('username', shopSlug || 'barberia-picasso'); // Lo slug fa da username
-        params.append('password', password);
+      // ROTTA DI LOGIN CLASSICO (Restituisce il JWT Token)
+      const params = new URLSearchParams();
+      params.append('username', shopSlug || 'barberia-picasso'); // Lo slug fa da username
+      params.append('password', password);
 
-        const response = await axios.post(`${API_BASE}/admin/login`, params, {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-       
-        // Salviamo il token nel localStorage del browser
-        localStorage.setItem("admin_token", response.data.access_token);
-        onLoginSuccess();
-      }
+      const response = await axios.post(`${API_BASE}/admin/login`, params, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+     
+      // Salviamo il token nel localStorage del browser
+      localStorage.setItem("admin_token", response.data.access_token);
+      onLoginSuccess();
     } catch (err) {
-      if (err.response?.status === 400 && isSetupMode) {
-        setError("Le salon a déjà un mot de passe défini.");
-        setHasPassword(true);
-        setIsSetupMode(false);
-      } else {
-        setError("Identifiants invalides. Veuillez réessayer.");
-      }
+      setError("Identifiants invalides. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +52,7 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
             Espace réservé
           </h2>
           <p className="mt-2 text-sm font-medium text-neutral-500">
-            {isSetupMode ? "Définissez le mot de passe principal du salon" : "Saisissez le mot de passe pour accéder"}
+            Saisissez le mot de passe pour accéder
           </p>
         </div>
 
@@ -118,21 +95,9 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
             className={`w-full py-3.5 mt-2 text-[15px] font-bold text-white transition-all shadow-md rounded-xl
               ${isLoading ? 'bg-neutral-400 cursor-not-allowed' : 'bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98]'}`}
           >
-            {isLoading ? 'Veuillez patienter...' : (isSetupMode ? 'Définir le mot de passe' : 'Se connecter')}
+            {isLoading ? 'Veuillez patienter...' : 'Se connecter'}
           </button>
         </form>
-
-        {/* Bottone nascosto per i developer/admin per passare alla modalità Setup */}
-        {!hasPassword && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsSetupMode(!isSetupMode)}
-              className="text-xs font-bold transition-colors text-neutral-400 hover:text-neutral-900"
-            >
-              {isSetupMode ? "Retour à la connexion" : "Première fois ? Définir le mot de passe"}
-            </button>
-          </div>
-        )}
 
       </div>
     </div>
