@@ -64,6 +64,42 @@ function getApiError(error) {
   return null;
 }
 
+// NUOVO (solo estetica): prepara il contenuto del popup elegante del negozio che sostituisce
+// gli alert() nativi del browser. Il testo mostrato al cliente resta quello già pronto in francese
+// inviato dal backend; icona e titolo vengono scelti in base al codice errore (se il codice non
+// è riconosciuto si usa un titolo neutro). "fallback" è il contenuto usato quando l'errore non
+// arriva dal backend (es. rete assente).
+function getNoticeContent(apiError, fallback) {
+  if (!apiError) {
+    return { buttonLabel: "J'ai compris", ...fallback };
+  }
+
+  const code = String(apiError.code || "").toLowerCase();
+  let icon = "ℹ️";
+  let title = "Action impossible";
+  let buttonLabel = "J'ai compris";
+
+  if (code === "otp_invalid") {
+    icon = "🔐";
+    title = "Code incorrect";
+    buttonLabel = "Réessayer";
+  } else if (code === "phone_name_mismatch") {
+    icon = "👤";
+    title = "Nom différent";
+  } else if (/limit|too_many|blocked|locked|attempt|throttle|cooldown|cap/.test(code)) {
+    icon = "⏳";
+    title = "Limite atteinte";
+  } else if (code.includes("expired")) {
+    icon = "⌛";
+    title = "Code expiré";
+  } else if (code.includes("phone")) {
+    icon = "📱";
+    title = "Numéro invalide";
+  }
+
+  return { icon, title, message: apiError.message, buttonLabel };
+}
+
 export default function ShopBooking({ shopId, service, barbers, onClose }) {
   const [step, setStep] = useState(1);
   const [selectedBarber, setSelectedBarber] = useState(null);
@@ -80,6 +116,9 @@ export default function ShopBooking({ shopId, service, barbers, onClose }) {
   const [fetchError, setFetchError] = useState(false);
   // Orario per cui mostrare il popup "non disponibile" (null = popup chiuso)
   const [unavailableTime, setUnavailableTime] = useState(null);
+  // NUOVO: popup elegante per gli avvisi del backend (null = chiuso), al posto degli alert() del browser
+  // Forma: { icon, title, message, buttonLabel }
+  const [notice, setNotice] = useState(null);
  
   // STATI CLIENTE E OTP (STEP 3 & 4)
   const [clientData, setClientData] = useState({
@@ -130,6 +169,16 @@ async function fetchSlots() {
       return () => { isMounted = false; };
     }
   }, [step, selectedDate, selectedBarber, shopId, service.id]);
+
+  // NUOVO: il popup degli avvisi si chiude anche con il tasto Esc (comodo da PC)
+  useEffect(() => {
+    if (!notice) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setNotice(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [notice]);
 
   if (!service) return null;
 
@@ -209,8 +258,13 @@ async function fetchSlots() {
         // NUOVO: se il backend ha un messaggio per il cliente (troppe richieste, numero bloccato,
         // limite di prenotazioni, telefono non valido...) lo mostriamo; si resta sullo step 3
         // così il cliente può correggere i dati.
+        // Ora il messaggio compare nel popup elegante del negozio (non più con alert del browser).
         const apiError = getApiError(error);
-        alert(apiError?.message || "Un problème de connexion est survenu. Veuillez réessayer.");
+        setNotice(getNoticeContent(apiError, {
+          icon: "📶",
+          title: "Problème de connexion",
+          message: "Un problème de connexion est survenu. Veuillez réessayer.",
+        }));
       }
     } finally {
       setIsSubmitting(false);
@@ -239,8 +293,14 @@ async function fetchSlots() {
         // Solo se il codice è semplicemente sbagliato si resta sullo step 4;
         // negli altri casi (codice scaduto, numero bloccato, limiti) il codice non è più valido
         // e si torna allo step 3.
+        // Ora il messaggio compare nel popup elegante del negozio (non più con alert del browser).
         const apiError = getApiError(error);
-        alert(apiError?.message || "Le code saisi n'est pas valide ou a expiré. Veuillez réessayer.");
+        setNotice(getNoticeContent(apiError, {
+          icon: "🔐",
+          title: "Code non valide",
+          message: "Le code saisi n'est pas valide ou a expiré. Veuillez réessayer.",
+          buttonLabel: "Réessayer",
+        }));
         setOtpCode("");
         if (apiError && apiError.code !== "otp_invalid") {
           setStep(3);
@@ -507,6 +567,40 @@ async function fetchSlots() {
               className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-neutral-900 to-neutral-800 rounded-2xl active:scale-[0.98]"
             >
               J'ai compris
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* NUOVO: POPUP ELEGANTE PER GLI AVVISI DEL BACKEND (OTP, limiti, telefono...) - sostituisce gli alert() del browser */}
+      {notice && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm"
+          onClick={() => setNotice(null)}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="notice-title"
+            aria-describedby="notice-message"
+            className="w-full max-w-sm p-6 text-center bg-white shadow-2xl rounded-3xl animate-fade-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full shadow-inner bg-neutral-100 ring-[10px] ring-neutral-100/50">
+              <span className="text-3xl">{notice.icon}</span>
+            </div>
+            <h3 id="notice-title" className="mb-2 text-xl font-extrabold tracking-tight text-slate-800">
+              {notice.title}
+            </h3>
+            <p id="notice-message" className="mb-6 text-sm font-medium leading-relaxed text-slate-500">
+              {notice.message}
+            </p>
+            <button
+              autoFocus
+              onClick={() => setNotice(null)}
+              className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 rounded-2xl active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+            >
+              {notice.buttonLabel}
             </button>
           </div>
         </div>
