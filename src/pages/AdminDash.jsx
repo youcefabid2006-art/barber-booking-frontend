@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import {
   getAdminBookings, deleteAdminBooking, getAdminBarbers, updateBarberShifts,
   getShopBySlug, updateShopDetails, createService, updateService, deleteService, createBarber,
@@ -120,11 +119,10 @@ function DialogHost({ dialog, onClose }) {
 }
 
 export default function AdminDashboard() {
-  const { id } = useParams();
-  const activeShopId = id || 1;
-
   // ===== NUOVO STATO DI AUTENTICAZIONE =====
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Slug del negozio che ha fatto il login (= username): arriva dal Login e resta in localStorage insieme al token
+  const [shopSlug, setShopSlug] = useState(null);
 
   const [activeTab, setActiveTab] = useState("bookings");
   const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +145,8 @@ export default function AdminDashboard() {
 
   // Stati Negozio
   const [shopDetails, setShopDetails] = useState(null);
+  // Id del negozio loggato: si ricava dal negozio caricato tramite slug (disponibile dopo loadDashboardData)
+  const activeShopId = shopDetails?.id;
   const [shopForm, setShopForm] = useState({
     name: "", slug: "", description: "", address: "", phone: "", opening_hours: {}
   });
@@ -171,10 +171,13 @@ export default function AdminDashboard() {
   // Controllo del Token all'avvio
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
-    if (token) {
+    const savedSlug = localStorage.getItem("admin_shop_slug");
+    // Servono sia il token sia lo slug: senza slug non sappiamo quale negozio caricare
+    if (token && savedSlug) {
+      setShopSlug(savedSlug);
       setIsAuthenticated(true);
     } else {
-      setIsLoading(false); // Se non c'è token, smetti di caricare e mostra il Login
+      setIsLoading(false); // Se non c'è token o slug, smetti di caricare e mostra il Login
     }
   }, []);
 
@@ -183,12 +186,12 @@ export default function AdminDashboard() {
     if (isAuthenticated) {
       loadDashboardData();
     }
-  }, [activeShopId, isAuthenticated]);
+  }, [shopSlug, isAuthenticated]);
 
   async function loadDashboardData() {
     setIsLoading(true);
     try {
-      const shopData = await getShopBySlug("barberia-picasso");
+      const shopData = await getShopBySlug(shopSlug);
       setShopDetails(shopData);
      
       setShopForm({
@@ -204,8 +207,8 @@ export default function AdminDashboard() {
       });
 
       const [bookingsData, barbersData] = await Promise.all([
-        getAdminBookings(activeShopId),
-        getAdminBarbers(activeShopId)
+        getAdminBookings(shopData.id),
+        getAdminBarbers(shopData.id)
       ]);
       setBookings(bookingsData);
       setBarbers(barbersData);
@@ -372,8 +375,10 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return (
       <ShopLogin_ad
-        shopSlug="barberia-picasso"
-        onLoginSuccess={() => setIsAuthenticated(true)}
+        onLoginSuccess={(slug) => {
+          setShopSlug(slug);
+          setIsAuthenticated(true);
+        }}
       />
     );
   }
@@ -402,6 +407,14 @@ export default function AdminDashboard() {
           <button
             onClick={() => {
               localStorage.removeItem("admin_token");
+              localStorage.removeItem("admin_shop_slug");
+              // Svuota i dati del negozio: se poi entra un altro negozio non deve vedere quelli del precedente
+              setShopSlug(null);
+              setShopDetails(null);
+              setBookings([]);
+              setBarbers([]);
+              setSelectedBarber(null);
+              setDraftShifts([]);
               setIsAuthenticated(false);
             }}
             className="px-4 py-2 text-sm font-bold text-red-600 transition-colors border border-red-200 rounded-xl hover:bg-red-50"

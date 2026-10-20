@@ -8,7 +8,9 @@ const API_BASE = import.meta.env.DEV
 
 // NOTA: la prima password del salone non si imposta più da questa pagina:
 // la rotta setup-password ora richiede la chiave master (la imposti tu da Swagger in locale).
-export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
+export default function ShopLogin_ad({ onLoginSuccess }) {
+  // Lo slug del negozio (= username) ora lo digita l'utente: non è più fisso su barberia-picasso
+  const [slug, setSlug] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,8 +22,9 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
 
     try {
       // ROTTA DI LOGIN CLASSICO (Restituisce il JWT Token)
+      const cleanSlug = slug.trim(); // toglie gli spazi accidentali (copia-incolla, autocompletamento del telefono)
       const params = new URLSearchParams();
-      params.append('username', shopSlug || 'barberia-picasso'); // Lo slug fa da username
+      params.append('username', cleanSlug); // Lo slug fa da username
       params.append('password', password);
 
       const response = await axios.post(`${API_BASE}/admin/login`, params, {
@@ -30,7 +33,9 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
      
       // Salviamo il token nel localStorage del browser
       localStorage.setItem("admin_token", response.data.access_token);
-      onLoginSuccess();
+      // Salviamo anche lo slug: la dashboard ne ha bisogno per sapere quale negozio caricare
+      localStorage.setItem("admin_shop_slug", cleanSlug);
+      onLoginSuccess(cleanSlug);
     } catch (err) {
       setError("Identifiants invalides. Veuillez réessayer.");
     } finally {
@@ -69,9 +74,14 @@ export default function ShopLogin_ad({ shopSlug, onLoginSuccess }) {
             </label>
             <input
               type="text"
-              value={shopSlug || 'barberia-picasso'}
-              disabled
-              className="w-full px-4 py-3 font-bold text-neutral-500 bg-neutral-100 border rounded-xl border-neutral-200 cursor-not-allowed"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              required
+              placeholder="ex. mon-salon"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              className="w-full px-4 py-3 font-medium text-neutral-900 placeholder-neutral-400 border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
             />
           </div>
 
