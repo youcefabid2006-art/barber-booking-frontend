@@ -242,11 +242,19 @@ async function fetchSlots() {
 
     try {
       // Chiamiamo la nuova rotta che salva l'OTP e manda l'SMS fittizio
-      await requestOtp({
+      const otpResponse = await requestOtp({
         phone_number: clientData.phone,
         booking_payload: bookingPayload
       });
-      setStep(4); // Passa alla schermata inserimento OTP
+      if (otpResponse && typeof otpResponse.auto_code === "string") {
+        // NEGOZIO DEMO: il backend non manda l'SMS e restituisce il codice (solo per i negozi in OTP_AUTO_SHOP_IDS).
+        // Mostriamo comunque la schermata di inserimento del codice (step 4), ma con il codice già compilato:
+        // il cliente deve solo premere "Confirmer la réservation" (la conferma passa da handleVerifyOtp, come per tutti).
+        setOtpCode(otpResponse.auto_code);
+        setStep(4);
+      } else {
+        setStep(4); // Passa alla schermata inserimento OTP
+      }
     } catch (error) {
       console.error("Errore generazione OTP:", error);
       if (isSlotUnavailableError(error)) {
