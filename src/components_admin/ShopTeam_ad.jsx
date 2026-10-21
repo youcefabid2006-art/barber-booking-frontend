@@ -57,22 +57,22 @@ function TimeField({ value, onChange, title }) {
       <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
 
       <div className="relative w-full max-w-sm p-5 pb-6 bg-white shadow-2xl rounded-t-3xl md:rounded-3xl">
-        <p className="text-sm font-bold text-center text-neutral-500">{title}</p>
-        <p className="mt-1 text-5xl font-extrabold tracking-tight text-center tabular-nums text-neutral-900">
+        <p className="text-sm font-bold text-center text-fg-muted">{title}</p>
+        <p className="mt-1 text-5xl font-extrabold tracking-tight text-center tabular-nums text-fg">
           {hh}:{mm}
         </p>
 
         <div className="grid grid-cols-2 gap-3 mt-5">
           <div>
-            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-neutral-400">Heures</div>
-            <div ref={hoursRef} className="relative h-64 p-1.5 space-y-1 overflow-y-auto overscroll-contain rounded-2xl bg-neutral-50">
+            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-fg-faint">Heures</div>
+            <div ref={hoursRef} className="relative h-64 p-1.5 space-y-1 overflow-y-auto overscroll-contain rounded-2xl bg-tint">
               {HOURS.map((h) => (
                 <button
                   key={h}
                   type="button"
                   data-active={hh === h}
                   onClick={() => setHh(h)}
-                  className={`block w-full py-2.5 text-lg font-bold tabular-nums rounded-xl transition-colors ${hh === h ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-200"}`}
+                  className={`block w-full py-2.5 text-lg font-bold tabular-nums rounded-xl transition-colors ${hh === h ? "bg-primary text-white" : "text-fg-2 hover:bg-line-strong"}`}
                 >
                   {h}
                 </button>
@@ -81,15 +81,15 @@ function TimeField({ value, onChange, title }) {
           </div>
 
 <div>
-            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-neutral-400">Minutes</div>
-            <div ref={minutesRef} className="relative h-64 p-1.5 space-y-1 overflow-y-auto overscroll-contain rounded-2xl bg-neutral-50">
+            <div className="mb-2 text-xs font-bold tracking-wide text-center uppercase text-fg-faint">Minutes</div>
+            <div ref={minutesRef} className="relative h-64 p-1.5 space-y-1 overflow-y-auto overscroll-contain rounded-2xl bg-tint">
               {MINUTES.map((m) => (
                 <button
                   key={m}
                   type="button"
                   data-active={mm === m}
                   onClick={() => setMm(m)}
-                  className={`block w-full py-2.5 text-lg font-bold tabular-nums rounded-xl transition-colors ${mm === m ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-200"}`}
+                  className={`block w-full py-2.5 text-lg font-bold tabular-nums rounded-xl transition-colors ${mm === m ? "bg-primary text-white" : "text-fg-2 hover:bg-line-strong"}`}
                 >
                   {m}
                 </button>
@@ -102,14 +102,14 @@ function TimeField({ value, onChange, title }) {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex-1 py-3 text-base font-bold transition-colors rounded-xl text-neutral-700 bg-neutral-100 hover:bg-neutral-200"
+            className="flex-1 py-3 text-base font-bold transition-colors rounded-xl text-fg-2 bg-tint-2 hover:bg-line-strong"
           >
             Annuler
           </button>
           <button
             type="button"
             onClick={confirm}
-            className="flex-1 py-3 text-base font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95"
+            className="flex-1 py-3 text-base font-bold text-white transition-all rounded-xl bg-primary hover:bg-primary-hover active:scale-95"
           >
             Confirmer
           </button>
@@ -124,10 +124,10 @@ function TimeField({ value, onChange, title }) {
         type="button"
         onClick={openPicker}
         aria-label={title}
-        className="flex items-center gap-2 px-2 py-1.5 text-sm font-bold text-neutral-700 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-900"
+        className="flex items-center gap-2 px-2 py-1.5 text-sm font-bold text-fg-2 bg-white border border-fg-ghost rounded-lg focus:outline-none focus:border-primary"
       >
-        <span className={`tabular-nums ${value ? "" : "text-neutral-400"}`}>{value || "--:--"}</span>
-        <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <span className={`tabular-nums ${value ? "" : "text-fg-faint"}`}>{value || "--:--"}</span>
+        <svg className="w-4 h-4 text-fg-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </button>
@@ -161,35 +161,35 @@ export default function ShopTeam_ad({
             className={`flex flex-col items-center cursor-pointer transition-all duration-200 ${selectedBarber.id === b.id ? '' : 'opacity-45 hover:opacity-80'}`}
           >
             <div className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 shadow-md transition-all
-              ${selectedBarber.id === b.id ? 'bg-neutral-900 ring-4 ring-neutral-200' : 'bg-neutral-800'}`}>
+              ${selectedBarber.id === b.id ? 'bg-primary ring-4 ring-glow' : 'bg-grad-end'}`}>
               {getInitials(b.name)}
             </div>
-            <span className={`text-base font-bold ${selectedBarber.id === b.id ? 'text-neutral-900' : 'text-neutral-500'}`}>{b.name}</span>
+            <span className={`text-base font-bold ${selectedBarber.id === b.id ? 'text-fg' : 'text-fg-muted'}`}>{b.name}</span>
           </div>
         ))}
       </div>
 
-<div className="p-6 bg-white border shadow-sm rounded-2xl border-neutral-200">
-        <h3 className="mb-6 text-lg font-extrabold text-neutral-900">Calendrier de {selectedBarber.name}</h3>
+<div className="p-6 bg-white border shadow-sm rounded-2xl border-line-strong">
+        <h3 className="mb-6 text-lg font-extrabold text-fg font-heading">Calendrier de {selectedBarber.name}</h3>
        
         <div className="flex flex-col">
           {WEEKDAYS.map((dayName, dayIndex) => {
             const dayShifts = draftShifts.filter(s => s.weekday === dayIndex);
            
             return (
-              <div key={dayIndex} className="flex flex-col py-5 border-b border-neutral-100 last:border-0 md:flex-row md:items-center gap-4">
-                <div className="w-32 font-bold text-neutral-800">{dayName}</div>
+              <div key={dayIndex} className="flex flex-col py-5 border-b border-line last:border-0 md:flex-row md:items-center gap-4">
+                <div className="w-32 font-bold text-fg">{dayName}</div>
                
                 <div className="flex flex-wrap flex-1 gap-2">
                   {dayShifts.length === 0 ? (
-                    <span className="px-3 py-1.5 text-sm font-bold text-neutral-400 bg-neutral-50 rounded-lg">Repos</span>
+                    <span className="px-3 py-1.5 text-sm font-bold text-fg-faint bg-tint rounded-lg">Repos</span>
                   ) : (
                     dayShifts.map((shift) => {
                       const realIndex = draftShifts.findIndex(s => s === shift);
                       return (
-                        <div key={realIndex} className="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-neutral-900 bg-neutral-100 border border-neutral-200 rounded-lg shadow-sm">
+                        <div key={realIndex} className="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-fg bg-tint-2 border border-line-strong rounded-lg shadow-sm">
                           <span>{shift.start_time.slice(0,5)} - {shift.end_time.slice(0,5)}</span>
-                          <button onClick={() => handleRemoveShift(realIndex)} className="flex items-center justify-center w-5 h-5 ml-1 transition-colors rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-red-500">
+                          <button onClick={() => handleRemoveShift(realIndex)} className="flex items-center justify-center w-5 h-5 ml-1 transition-colors rounded-full text-fg-faint hover:bg-line-strong hover:text-red-500">
                             &times;
                           </button>
                         </div>
@@ -204,7 +204,7 @@ export default function ShopTeam_ad({
                     value={newShiftInputs[dayIndex].start}
                     onChange={(v) => setNewShiftInputs({...newShiftInputs, [dayIndex]: {...newShiftInputs[dayIndex], start: v}})}
                   />
-                  <span className="font-bold text-neutral-400">-</span>
+                  <span className="font-bold text-fg-faint">-</span>
                   <TimeField
                     title="Heure de fin"
                     value={newShiftInputs[dayIndex].end}
@@ -212,7 +212,7 @@ export default function ShopTeam_ad({
                   />
                   <button
                     onClick={() => handleAddShift(dayIndex)}
-                    className="px-3 py-1.5 text-sm font-bold text-white transition-all bg-neutral-800 rounded-lg hover:bg-neutral-900 active:scale-95"
+                    className="px-3 py-1.5 text-sm font-bold text-white transition-all bg-grad-end rounded-lg hover:bg-primary-hover active:scale-95"
                   >
                     +
                   </button>
@@ -222,14 +222,14 @@ export default function ShopTeam_ad({
           })}
         </div>
        
-        <div className="pt-8 mt-4 border-t border-neutral-100">
+        <div className="pt-8 mt-4 border-t border-line">
           <button
             onClick={handleSaveShifts}
             disabled={isSavingShifts}
             className={`w-full py-4 text-lg font-extrabold text-white transition-all shadow-xl rounded-xl
               ${isSavingShifts
-                ? 'bg-neutral-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98]'}`}
+                ? 'bg-primary-soft cursor-not-allowed'
+                : 'bg-gradient-to-r from-grad-start to-grad-end hover:from-primary-hover hover:to-primary active:scale-[0.98]'}`}
           >
             {isSavingShifts ? 'Enregistrement en cours...' : "Enregistrer les horaires de l'équipe"}
           </button>

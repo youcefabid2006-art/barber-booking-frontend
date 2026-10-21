@@ -322,53 +322,53 @@ async function fetchSlots() {
   return (
     <>
       <div
-        className="fixed inset-0 z-40 transition-opacity bg-slate-900/60 backdrop-blur-sm"
+        className="fixed inset-0 z-40 transition-opacity bg-fg/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white rounded-t-[2rem] shadow-2xl h-[85vh] sm:h-[75vh] max-w-2xl mx-auto transform transition-transform duration-300 ease-out animate-fade-up">
        
         {/* HEADER FISSO */}
-        <div className="flex flex-col pt-3 pb-4 px-6 border-b border-slate-100 shrink-0 bg-white rounded-t-[2rem]">
-          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+        <div className="flex flex-col pt-3 pb-4 px-6 border-b border-line shrink-0 bg-white rounded-t-[2rem]">
+          <div className="w-12 h-1.5 bg-line-strong rounded-full mx-auto mb-4"></div>
          
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {step > 1 && step < 5 && (
-                <button onClick={handleBack} className="p-2 -ml-2 transition-colors rounded-full text-slate-600 hover:bg-slate-100">
+                <button onClick={handleBack} className="p-2 -ml-2 transition-colors rounded-full text-fg-2 hover:bg-tint-2">
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                 </button>
               )}
               <div>
-                <h2 className="text-xl font-extrabold tracking-tight text-slate-900">{service.name}</h2>
-                <p className="text-sm font-bold text-neutral-700">{Number(service.price)} DA • {service.duration_minutes} min</p>
+                <h2 className="text-xl font-extrabold tracking-tight text-fg font-heading">{service.name}</h2>
+                <p className="text-sm font-bold text-fg-2">{Number(service.price)} DA • {service.duration_minutes} min</p>
               </div>
             </div>
            
-            <button onClick={onClose} className="p-2 transition-colors rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100">
+            <button onClick={onClose} className="p-2 transition-colors rounded-full text-fg-faint hover:text-fg hover:bg-tint-2">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
         </div>
 
 {/* CORPO SCROLLABILE */}
-        <div className="relative flex-1 pb-6 overflow-y-auto bg-slate-50">
+        <div className="relative flex-1 pb-6 overflow-y-auto bg-tint">
          
           {/* STEP 1: BARBIERE */}
           {step === 1 && (
             <div className="p-6 animate-fade-up">
-              <h3 className="mb-5 text-lg font-bold text-slate-800">Avec qui souhaitez-vous réserver ?</h3>
+              <h3 className="mb-5 text-lg font-bold text-fg font-heading">Avec qui souhaitez-vous réserver ?</h3>
               <div className="flex flex-col gap-3">
                 {/* Controllo aggiunto qui: visibile solo se barbers > 1 */}
                 {barbers && barbers.length > 1 && (
-                  <button onClick={() => handleBarberSelect("any")} className="flex items-center justify-between p-5 text-left transition-all bg-white border-2 border-slate-100 rounded-2xl hover:border-neutral-900 hover:shadow-md active:scale-[0.98]">
-                    <span className="text-lg font-bold text-slate-800">N'importe quel collaborateur</span>
-                    <span className="px-3 py-1 text-xs font-bold tracking-wider uppercase rounded-full text-neutral-800 bg-neutral-100">Première dispo.</span>
+                  <button onClick={() => handleBarberSelect("any")} className="flex items-center justify-between p-5 text-left transition-all bg-white border-2 border-line rounded-2xl hover:border-primary hover:shadow-md active:scale-[0.98]">
+                    <span className="text-lg font-bold text-fg">N'importe quel collaborateur</span>
+                    <span className="px-3 py-1 text-xs font-bold tracking-wider uppercase rounded-full text-fg bg-tint-2">Première dispo.</span>
                   </button>
                 )}
                 {barbers && barbers.map(barber => (
-                  <button key={barber.id} onClick={() => handleBarberSelect(barber.id)} className="flex items-center justify-between p-5 text-left transition-all bg-white border-2 border-slate-100 rounded-2xl hover:border-neutral-900 hover:shadow-md active:scale-[0.98]">
-                     <span className="text-lg font-bold text-slate-800">{barber.name}</span>
+                  <button key={barber.id} onClick={() => handleBarberSelect(barber.id)} className="flex items-center justify-between p-5 text-left transition-all bg-white border-2 border-line rounded-2xl hover:border-primary hover:shadow-md active:scale-[0.98]">
+                     <span className="text-lg font-bold text-fg">{barber.name}</span>
                   </button>
                 ))}
               </div>
@@ -379,10 +379,10 @@ async function fetchSlots() {
           {step === 2 && (
             <div className="flex flex-col h-full animate-fade-up">
              
-              <div className="sticky top-0 z-10 pt-2 pb-1 bg-white border-b shadow-sm border-slate-100">
+              <div className="sticky top-0 z-10 pt-2 pb-1 bg-white border-b shadow-sm border-line">
                 <div className="flex gap-2 px-4 pb-3 overflow-x-auto snap-x snap-mandatory hide-scrollbar">
                   {availableDays.length === 0 ? (
-                    <div className="p-3 text-sm font-bold text-slate-500">Aucun jour de travail défini.</div>
+                    <div className="p-3 text-sm font-bold text-fg-muted">Aucun jour de travail défini.</div>
                   ) : (
                     availableDays.map((day) => {
                       const isSelected = day.fullDate === selectedDate;
@@ -392,11 +392,11 @@ async function fetchSlots() {
                           onClick={() => setSelectedDate(day.fullDate)}
                           className={`flex-none w-[4.5rem] flex flex-col items-center justify-center p-3 rounded-2xl snap-center transition-all duration-200
                             ${isSelected
-                              ? 'bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-lg shadow-neutral-300 scale-105'
-                              : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                              ? 'bg-gradient-to-br from-grad-start to-grad-end text-white shadow-lg shadow-glow scale-105'
+                              : 'bg-tint text-fg-muted hover:bg-tint-2'
                             }`}
                         >
-                          <span className={`text-xs font-bold uppercase tracking-wide mb-1 ${isSelected ? 'text-neutral-300' : 'text-slate-400'}`}>
+                          <span className={`text-xs font-bold uppercase tracking-wide mb-1 ${isSelected ? 'text-white/80' : 'text-fg-faint'}`}>
                             {day.dayName}
                           </span>
                           <span className="text-xl font-extrabold leading-none">
@@ -411,12 +411,12 @@ async function fetchSlots() {
 
 {/* Griglia Orari */}
               <div className="p-6">
-                <h3 className="mb-4 text-sm font-bold tracking-wider uppercase text-slate-500">Horaires disponibles</h3>
+                <h3 className="mb-4 text-sm font-bold tracking-wider uppercase text-fg-muted">Horaires disponibles</h3>
                
                 {isLoadingSlots ? (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className="h-14 bg-slate-200 rounded-2xl animate-pulse"></div>
+                      <div key={i} className="h-14 bg-line-strong rounded-2xl animate-pulse"></div>
                     ))}
                   </div>
                 ) : fetchError ? (
@@ -438,7 +438,7 @@ async function fetchSlots() {
                         <button
                           key={slot.time}
                           onClick={() => handleTimeSelect(slot.time)}
-                          className="py-4 text-lg font-bold transition-all bg-white border-2 text-slate-700 border-slate-100 rounded-2xl hover:border-neutral-900 hover:text-neutral-900 hover:shadow-md active:scale-[0.97]"
+                          className="py-4 text-lg font-bold transition-all bg-white border-2 text-fg-2 border-line rounded-2xl hover:border-primary hover:text-primary hover:shadow-md active:scale-[0.97]"
                         >
                           {slot.time}
                         </button>
@@ -448,7 +448,7 @@ async function fetchSlots() {
                           key={slot.time}
                           onClick={() => setUnavailableTime(slot.time)}
                           aria-disabled="true"
-                          className="py-4 text-lg font-bold transition-all border-2 cursor-not-allowed bg-slate-100 text-slate-300 border-slate-100 rounded-2xl active:scale-[0.97]"
+                          className="py-4 text-lg font-bold transition-all border-2 cursor-not-allowed bg-tint-2 text-fg-ghost border-line rounded-2xl active:scale-[0.97]"
                         >
                           {slot.time}
                         </button>
@@ -456,9 +456,9 @@ async function fetchSlots() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 bg-white border-2 border-dashed rounded-3xl border-slate-200">
+                  <div className="flex flex-col items-center justify-center py-12 bg-white border-2 border-dashed rounded-3xl border-line-strong">
                     <span className="mb-3 text-4xl">😴</span>
-                    <span className="px-6 font-medium text-center text-slate-500">Aucun horaire disponible pour cette date. Essayez un autre jour !</span>
+                    <span className="px-6 font-medium text-center text-fg-muted">Aucun horaire disponible pour cette date. Essayez un autre jour !</span>
                   </div>
                 )}
               </div>
@@ -468,10 +468,10 @@ async function fetchSlots() {
           {/* STEP 3: DATI CLIENTE */}
           {step === 3 && (
             <div className="p-6 animate-fade-up">
-              <div className="flex items-center justify-between p-4 mb-6 border bg-neutral-50 border-neutral-200 rounded-2xl">
+              <div className="flex items-center justify-between p-4 mb-6 border bg-tint border-line-strong rounded-2xl">
                 <div>
-                  <p className="mb-1 text-xs font-bold tracking-wide uppercase text-neutral-500">Vous réservez pour le</p>
-                  <p className="text-lg font-extrabold text-neutral-900">
+                  <p className="mb-1 text-xs font-bold tracking-wide uppercase text-fg-muted">Vous réservez pour le</p>
+                  <p className="text-lg font-extrabold text-fg">
                     {new Date(selectedDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} à {selectedTime}
                   </p>
                 </div>
@@ -479,20 +479,20 @@ async function fetchSlots() {
 
 <form onSubmit={handleRequestOtp} className="flex flex-col gap-5">
                 <div>
-                  <label className="block mb-2 ml-1 text-sm font-bold text-slate-700">Prénom</label>
-                  <input type="text" name="firstName" required value={clientData.firstName} onChange={handleInputChange} className="w-full px-5 py-4 font-medium transition-all bg-white border-2 border-slate-100 rounded-2xl focus:bg-white focus:outline-none focus:border-neutral-900 placeholder:text-slate-300" placeholder="Votre prénom" />
+                  <label className="block mb-2 ml-1 text-sm font-bold text-fg-2">Prénom</label>
+                  <input type="text" name="firstName" required value={clientData.firstName} onChange={handleInputChange} className="w-full px-5 py-4 font-medium transition-all bg-white border-2 border-line rounded-2xl focus:bg-white focus:outline-none focus:border-primary placeholder:text-fg-ghost" placeholder="Votre prénom" />
                 </div>
                 <div>
-                  <label className="block mb-2 ml-1 text-sm font-bold text-slate-700">Nom</label>
-                  <input type="text" name="lastName" required value={clientData.lastName} onChange={handleInputChange} className="w-full px-5 py-4 font-medium transition-all bg-white border-2 border-slate-100 rounded-2xl focus:bg-white focus:outline-none focus:border-neutral-900 placeholder:text-slate-300" placeholder="Votre nom" />
+                  <label className="block mb-2 ml-1 text-sm font-bold text-fg-2">Nom</label>
+                  <input type="text" name="lastName" required value={clientData.lastName} onChange={handleInputChange} className="w-full px-5 py-4 font-medium transition-all bg-white border-2 border-line rounded-2xl focus:bg-white focus:outline-none focus:border-primary placeholder:text-fg-ghost" placeholder="Votre nom" />
                 </div>
                 <div>
-                  <label className="block mb-2 ml-1 text-sm font-bold text-slate-700">Téléphone</label>
-                  <input type="tel" name="phone" required value={clientData.phone} onChange={handleInputChange} className="w-full px-5 py-4 font-medium transition-all bg-white border-2 border-slate-100 rounded-2xl focus:bg-white focus:outline-none focus:border-neutral-900 placeholder:text-slate-300" placeholder="+213" />
+                  <label className="block mb-2 ml-1 text-sm font-bold text-fg-2">Téléphone</label>
+                  <input type="tel" name="phone" required value={clientData.phone} onChange={handleInputChange} className="w-full px-5 py-4 font-medium transition-all bg-white border-2 border-line rounded-2xl focus:bg-white focus:outline-none focus:border-primary placeholder:text-fg-ghost" placeholder="+213" />
                 </div>
                
                 <div className="pt-2">
-                  <button type="submit" disabled={isSubmitting} className={`w-full py-4 text-lg font-extrabold text-white transition-all shadow-lg rounded-2xl shadow-neutral-300 ${isSubmitting ? 'bg-neutral-400 cursor-not-allowed' : 'bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98]'}`}>
+                  <button type="submit" disabled={isSubmitting} className={`w-full py-4 text-lg font-extrabold text-white transition-all shadow-lg rounded-2xl shadow-glow ${isSubmitting ? 'bg-primary-soft cursor-not-allowed' : 'bg-gradient-to-r from-grad-start to-grad-end hover:from-primary-hover hover:to-primary active:scale-[0.98]'}`}>
                     {isSubmitting ? 'Génération...' : 'Continuer'}
                   </button>
                 </div>
@@ -503,11 +503,11 @@ async function fetchSlots() {
           {/* STEP 4: VERIFICA OTP */}
           {step === 4 && (
             <div className="p-6 text-center animate-fade-up">
-              <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 shadow-inner bg-neutral-100 rounded-full">
+              <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 shadow-inner bg-tint-2 rounded-full">
                 <span className="text-3xl">📱</span>
               </div>
-              <h3 className="mb-2 text-2xl font-extrabold text-slate-800">Vérification du téléphone</h3>
-              <p className="mb-8 text-sm font-medium text-slate-500">
+              <h3 className="mb-2 text-2xl font-extrabold text-fg font-heading">Vérification du téléphone</h3>
+              <p className="mb-8 text-sm font-medium text-fg-muted">
                 Nous vous avons envoyé un SMS. Saisissez le code à 6 chiffres pour confirmer.
               </p>
 
@@ -519,11 +519,11 @@ async function fetchSlots() {
                     required
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} // Accetta solo numeri
-                    className="w-full text-center tracking-[0.5em] text-3xl px-5 py-4 font-bold transition-all bg-white border-2 border-slate-200 rounded-2xl focus:bg-white focus:outline-none focus:border-neutral-900 placeholder:text-slate-200"
+                    className="w-full text-center tracking-[0.5em] text-3xl px-5 py-4 font-bold transition-all bg-white border-2 border-line-strong rounded-2xl focus:bg-white focus:outline-none focus:border-primary placeholder:text-fg-ghost"
                     placeholder="------"
                   />
                 </div>
-                <button type="submit" disabled={isSubmitting || otpCode.length < 6} className={`w-full py-4 text-lg font-extrabold text-white transition-all shadow-lg rounded-2xl shadow-neutral-300 ${isSubmitting || otpCode.length < 6 ? 'bg-neutral-300 cursor-not-allowed' : 'bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98]'}`}>
+                <button type="submit" disabled={isSubmitting || otpCode.length < 6} className={`w-full py-4 text-lg font-extrabold text-white transition-all shadow-lg rounded-2xl shadow-glow ${isSubmitting || otpCode.length < 6 ? 'bg-primary-soft/60 cursor-not-allowed' : 'bg-gradient-to-r from-grad-start to-grad-end hover:from-primary-hover hover:to-primary active:scale-[0.98]'}`}>
                   {isSubmitting ? 'Vérification en cours...' : 'Confirmer la réservation'}
                 </button>
               </form>
@@ -533,16 +533,16 @@ async function fetchSlots() {
 {/* STEP 5: SUCCESSO */}
           {step === 5 && (
             <div className="flex flex-col items-center justify-center h-full p-8 mt-10 text-center animate-fade-up">
-              <div className="flex items-center justify-center w-24 h-24 mb-6 shadow-inner bg-neutral-100 rounded-full">
-                <svg className="w-12 h-12 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex items-center justify-center w-24 h-24 mb-6 shadow-inner bg-tint-2 rounded-full">
+                <svg className="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="mb-3 text-3xl font-extrabold text-slate-800">Réservé !</h3>
-              <p className="mb-10 text-lg font-medium text-slate-500">
-                Merci <span className="text-slate-800">{clientData.firstName}</span>.<br/>Nous vous attendons au salon !
+              <h3 className="mb-3 text-3xl font-extrabold text-fg font-heading">Réservé !</h3>
+              <p className="mb-10 text-lg font-medium text-fg-muted">
+                Merci <span className="text-fg">{clientData.firstName}</span>.<br/>Nous vous attendons au salon !
               </p>
-              <button onClick={onClose} className="w-full py-4 text-lg font-extrabold text-white transition-colors bg-neutral-900 rounded-2xl hover:bg-black shadow-xl active:scale-95">
+              <button onClick={onClose} className="w-full py-4 text-lg font-extrabold text-white transition-colors bg-primary rounded-2xl hover:bg-primary-hover shadow-xl active:scale-95">
                 Fermer
               </button>
             </div>
@@ -554,7 +554,7 @@ async function fetchSlots() {
       {/* POPUP: ORARIO NON DISPONIBILE PER QUESTO SERVIZIO */}
       {unavailableTime && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-fg/50 backdrop-blur-sm"
           onClick={() => setUnavailableTime(null)}
         >
           <div
@@ -563,16 +563,16 @@ async function fetchSlots() {
             className="w-full max-w-sm p-6 text-center bg-white shadow-2xl rounded-3xl animate-fade-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full shadow-inner bg-neutral-100">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full shadow-inner bg-tint-2">
               <span className="text-3xl">⏱️</span>
             </div>
-            <h3 className="mb-2 text-xl font-extrabold text-slate-800">Horaire non disponible</h3>
-            <p className="mb-6 text-sm font-medium text-slate-500">
+            <h3 className="mb-2 text-xl font-extrabold text-fg font-heading">Horaire non disponible</h3>
+            <p className="mb-6 text-sm font-medium text-fg-muted">
               {service.name} ({service.duration_minutes} min) n'est pas disponible à {unavailableTime}. Veuillez choisir un autre horaire.
             </p>
             <button
               onClick={() => setUnavailableTime(null)}
-              className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-neutral-900 to-neutral-800 rounded-2xl active:scale-[0.98]"
+              className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-grad-start to-grad-end rounded-2xl active:scale-[0.98]"
             >
               J'ai compris
             </button>
@@ -583,7 +583,7 @@ async function fetchSlots() {
       {/* NUOVO: POPUP ELEGANTE PER GLI AVVISI DEL BACKEND (OTP, limiti, telefono...) - sostituisce gli alert() del browser */}
       {notice && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-fg/50 backdrop-blur-sm"
           onClick={() => setNotice(null)}
         >
           <div
@@ -594,19 +594,19 @@ async function fetchSlots() {
             className="w-full max-w-sm p-6 text-center bg-white shadow-2xl rounded-3xl animate-fade-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full shadow-inner bg-neutral-100 ring-[10px] ring-neutral-100/50">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full shadow-inner bg-tint-2 ring-[10px] ring-tint-2/50">
               <span className="text-3xl">{notice.icon}</span>
             </div>
-            <h3 id="notice-title" className="mb-2 text-xl font-extrabold tracking-tight text-slate-800">
+            <h3 id="notice-title" className="mb-2 text-xl font-extrabold tracking-tight text-fg font-heading">
               {notice.title}
             </h3>
-            <p id="notice-message" className="mb-6 text-sm font-medium leading-relaxed text-slate-500">
+            <p id="notice-message" className="mb-6 text-sm font-medium leading-relaxed text-fg-muted">
               {notice.message}
             </p>
             <button
               autoFocus
               onClick={() => setNotice(null)}
-              className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 rounded-2xl active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+              className="w-full py-3 text-lg font-extrabold text-white transition-all shadow-lg bg-gradient-to-r from-grad-start to-grad-end hover:from-primary-hover hover:to-primary rounded-2xl active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {notice.buttonLabel}
             </button>

@@ -4,9 +4,65 @@
   color-scheme: only light;
 }
 
+/* ================= TEMI DEL NEGOZIO =================
+   Il tema si sceglie con l'attributo data-theme su <html> (lo imposta ShopPage
+   in base a shop.business_type). Senza attributo, o con "barber", valgono i
+   valori qui sotto, che riproducono i colori attuali (equivalenti hex delle
+   classi slate/neutral usate finora).
+   Per cambiare lo stile di un tipo di negozio si modificano SOLO questi blocchi. */
+:root {
+  --th-page: #f0f2f5;          /* sfondo pagina */
+  --th-tint: #f8fafc;          /* sfondi morbidi (righe, pill, aree secondarie) */
+  --th-tint-2: #f1f5f9;        /* sfondi morbidi più marcati (hover, icone, badge) */
+  --th-line: #f1f5f9;          /* bordi leggeri */
+  --th-line-strong: #e2e8f0;   /* bordi normali */
+  --th-fg: #0f172a;            /* testo principale / titoli */
+  --th-fg-2: #475569;          /* testo secondario */
+  --th-fg-muted: #64748b;      /* testo attenuato */
+  --th-fg-faint: #94a3b8;      /* testo molto attenuato, icone */
+  --th-fg-ghost: #cbd5e1;      /* placeholder, elementi disattivati */
+  --th-primary: #171717;       /* colore principale (testi attivi, bordi, riempimenti) */
+  --th-grad-start: #171717;    /* gradiente dei bottoni: partenza */
+  --th-grad-end: #262626;      /* gradiente dei bottoni: arrivo */
+  --th-avatar-end: #404040;    /* arrivo del gradiente degli avatar del team */
+  --th-primary-hover: #000000; /* bottone premuto/hover */
+  --th-primary-soft: #a3a3a3;  /* bottone disattivato */
+  --th-glow: #d4d4d4;          /* colore delle ombre dei bottoni */
+  --th-font-heading: "Outfit", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Salone di bellezza: valori ufficiali dell'anteprima Lovable
+   (crema, tortora, oro caldo, cipria; titoli in Cormorant Garamond, testi in Jost). */
+[data-theme="beauty"] {
+  --th-page: #fbf7f2;
+  --th-tint: #fbf7f2;
+  --th-tint-2: #f6e4e0;        /* cipria */
+  --th-line: #efe3d6;
+  --th-line-strong: #e8d9c5;
+  --th-fg: #3b2f2a;
+  --th-fg-2: #6e5e56;
+  --th-fg-muted: #8a7a72;
+  --th-fg-faint: #a8978e;
+  --th-fg-ghost: #b9aba3;
+  --th-primary: #b08d57;       /* oro caldo */
+  --th-grad-start: #c9a27a;
+  --th-grad-end: #a07c4a;
+  --th-avatar-end: #8c6a3f;    /* bronzo */
+  --th-primary-hover: #8c6a3f;
+  --th-primary-soft: #d9bfa0;
+  --th-glow: rgba(176, 141, 87, 0.45);
+  --th-font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Cormorant è un serif sottile: nei saloni i titoli usano un peso medio invece del grassetto */
+[data-theme="beauty"] .font-heading {
+  font-weight: 500;
+}
+
 body {
-  background-color: #f0f2f5;
-  color: #0f172a;
+  background-color: var(--th-page);
+  color: var(--th-fg);
 }
 
 @theme {
@@ -20,6 +76,28 @@ body {
   --color-brass-light: #d4b57a;
   --color-mist: #ebe6df;
   --color-mist-dim: #b8b0a5;
+}
+
+/* Collega i token del tema a Tailwind: bg-page, text-fg, border-line, from-grad-start, font-heading ... */
+@theme inline {
+  --color-page: var(--th-page);
+  --color-tint: var(--th-tint);
+  --color-tint-2: var(--th-tint-2);
+  --color-line: var(--th-line);
+  --color-line-strong: var(--th-line-strong);
+  --color-fg: var(--th-fg);
+  --color-fg-2: var(--th-fg-2);
+  --color-fg-muted: var(--th-fg-muted);
+  --color-fg-faint: var(--th-fg-faint);
+  --color-fg-ghost: var(--th-fg-ghost);
+  --color-primary: var(--th-primary);
+  --color-grad-start: var(--th-grad-start);
+  --color-grad-end: var(--th-grad-end);
+  --color-avatar-end: var(--th-avatar-end);
+  --color-primary-hover: var(--th-primary-hover);
+  --color-primary-soft: var(--th-primary-soft);
+  --color-glow: var(--th-glow);
+  --font-heading: var(--th-font-heading);
 }
 
 @layer base {

@@ -57,7 +57,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 
   return (
     <>
-      <div className="overflow-hidden bg-white border-b shadow-sm border-slate-200 rounded-b-3xl">
+      <div className="overflow-hidden bg-white border-b shadow-sm border-line-strong rounded-b-3xl">
        
         <div className="w-full h-64 md:h-[400px] relative">
           <img
@@ -71,7 +71,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
         <div className="max-w-3xl px-4 py-6 mx-auto md:px-8">
           <div className="flex flex-col">
            
-            <h1 className="mb-3 text-3xl font-extrabold tracking-tight capitalize md:text-4xl text-slate-900">
+            <h1 className="mb-3 text-3xl font-extrabold tracking-tight capitalize md:text-4xl text-fg font-heading">
               {shop.name}
             </h1>
 
@@ -80,9 +80,9 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                 href={`https://maps.google.com/?q=${shop.address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 transition-colors w-fit text-slate-600 hover:text-slate-900"
+                className="flex items-center gap-2 transition-colors w-fit text-fg-2 hover:text-fg"
               >
-                <svg className="shrink-0 w-5 h-5 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="shrink-0 w-5 h-5 text-fg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -93,9 +93,9 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 
 <a
                 href={shop.phone ? `tel:${shop.phone}` : undefined}
-                className={`flex items-center gap-2 transition-colors w-fit ${shop.phone ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 cursor-default'}`}
+                className={`flex items-center gap-2 transition-colors w-fit ${shop.phone ? 'text-fg-2 hover:text-fg' : 'text-fg-faint cursor-default'}`}
               >
-                <svg className="shrink-0 w-5 h-5 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="shrink-0 w-5 h-5 text-fg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <span className="leading-tight font-medium text-[15px]">
@@ -112,7 +112,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                     href={formatExternalUrl(shop.instagram_url)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-neutral-900 ring-1 ring-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neutral-900 hover:text-white hover:ring-neutral-900 hover:shadow-[0_6px_16px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-95"
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-primary ring-1 ring-line-strong shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-white hover:ring-primary hover:shadow-[0_6px_16px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-95"
                     title="Instagram"
                   >
                     <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -128,7 +128,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                     href={formatExternalUrl(shop.facebook_url)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-neutral-900 ring-1 ring-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neutral-900 hover:text-white hover:ring-neutral-900 hover:shadow-[0_6px_16px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-95"
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-primary ring-1 ring-line-strong shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-white hover:ring-primary hover:shadow-[0_6px_16px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-95"
                     title="Facebook"
                   >
                     <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinejoin="round">
@@ -142,7 +142,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
                     href={`https://wa.me/${shop.whatsapp_number}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-neutral-900 ring-1 ring-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neutral-900 hover:text-white hover:ring-neutral-900 hover:shadow-[0_6px_16px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-95"
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-primary ring-1 ring-line-strong shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary hover:text-white hover:ring-primary hover:shadow-[0_6px_16px_rgba(15,23,42,0.18)] active:translate-y-0 active:scale-95"
                     title="WhatsApp"
                   >
                     <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor">
@@ -156,10 +156,10 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 
 <button
               onClick={onOpenDetails}
-              className="flex items-center justify-between w-full p-4 transition-all shadow-md rounded-xl bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-black hover:to-neutral-900 active:scale-[0.98] group"
+              className="flex items-center justify-between w-full p-4 transition-all shadow-md rounded-xl bg-gradient-to-r from-grad-start to-grad-end hover:from-primary-hover hover:to-primary active:scale-[0.98] group"
             >
               <span className="font-bold text-white text-[15px]">Voir les détails du salon</span>
-              <svg className="w-5 h-5 transition-colors text-neutral-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 transition-colors text-white/60 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -169,13 +169,13 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
       </div>
 
       {/* BOTTOM NAVIGATION BAR FISSA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-white border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-white border-t border-line shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
       <div className={`${isAdminAuth ? "grid grid-cols-3 items-center justify-items-center" : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
          
           {/* Tasto HOME */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex flex-col items-center justify-center p-2 transition-colors text-neutral-900"
+            className="flex flex-col items-center justify-center p-2 transition-colors text-primary"
           >
             <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -186,7 +186,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 {/* Tasto PRENOTAZIONI */}
           <button
             onClick={() => setShowPrenotazioni(true)}
-            className="flex flex-col items-center justify-center p-2 transition-colors text-slate-400 hover:text-neutral-900 group"
+            className="flex flex-col items-center justify-center p-2 transition-colors text-fg-faint hover:text-primary group"
           >
             <svg className="w-6 h-6 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -198,7 +198,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
           {isAdminAuth && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex flex-col items-center justify-center p-2 transition-colors text-slate-400 hover:text-neutral-900 group"
+              className="flex flex-col items-center justify-center p-2 transition-colors text-fg-faint hover:text-primary group"
             >
               <svg className="w-6 h-6 mb-1 transition-transform group-hover:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

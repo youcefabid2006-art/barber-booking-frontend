@@ -13,6 +13,16 @@ import ShopLogin_ad from "../components_admin/ShopLogin_ad.jsx";
 
 const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
+// ===== TEMA GRAFICO DEL GESTIONALE =====
+// Come nella pagina pubblica (ShopPage): il tema dipende da shop.business_type ("barber" di default oppure "beauty")
+// e si applica con l'attributo data-theme su <html>. Colori e font arrivano dai token di index.css.
+// Font dei saloni di bellezza (gli stessi di ShopPage): si caricano SOLO per i negozi "beauty".
+const BEAUTY_FONTS_URL =
+  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap";
+// Il tipo di negozio si ricorda in localStorage solo per dare i colori giusti anche alla schermata di caricamento
+// (il valore vero arriva comunque dal negozio, appena caricato)
+const THEME_CACHE_KEY = "admin_business_type";
+
 // ===== POPUP NELLO STILE DELLA PAGINA (al posto di alert / confirm / prompt del browser) =====
 let dialogSeq = 0;
 
@@ -34,7 +44,7 @@ function DialogCard({ dialog, onClose }) {
 
   const title = dialog.title || (isSuccess ? "Terminé !" : "Une erreur est survenue");
   const iconPath = isSuccess ? DIALOG_ICONS.success : isError ? DIALOG_ICONS.error : isConfirm ? DIALOG_ICONS.delete : DIALOG_ICONS.edit;
-  const iconTone = isSuccess ? "bg-green-50 text-green-600" : (isError || danger) ? "bg-red-50 text-red-500" : "bg-neutral-100 text-neutral-900";
+  const iconTone = isSuccess ? "bg-green-50 text-green-600" : (isError || danger) ? "bg-red-50 text-red-500" : "bg-tint-2 text-primary";
 
   const cancel = () => onClose(isPrompt ? null : isConfirm ? false : true);
 
@@ -47,21 +57,21 @@ function DialogCard({ dialog, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const cancelBtn = "flex-1 py-3 text-sm font-bold transition-colors rounded-xl text-neutral-700 bg-neutral-100 hover:bg-neutral-200 active:scale-95";
+  const cancelBtn = "flex-1 py-3 text-sm font-bold transition-colors rounded-xl text-fg-2 bg-tint-2 hover:bg-line-strong active:scale-95";
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-black/40" onClick={cancel} />
 
-      <div className="relative w-full max-w-sm p-6 text-center bg-white border shadow-2xl rounded-2xl border-neutral-200">
+      <div className="relative w-full max-w-sm p-6 text-center bg-white border shadow-2xl rounded-2xl border-line-strong">
         <div className={`flex items-center justify-center mx-auto mb-4 rounded-full w-14 h-14 ${iconTone}`}>
           <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />
           </svg>
         </div>
 
-        <h3 className="mb-1 text-lg font-extrabold text-neutral-900">{title}</h3>
-        {dialog.message && <p className="text-sm font-medium break-words text-neutral-500">{dialog.message}</p>}
+        <h3 className="mb-1 text-lg font-extrabold text-fg font-heading">{title}</h3>
+        {dialog.message && <p className="text-sm font-medium break-words text-fg-muted">{dialog.message}</p>}
 
         {isPrompt ? (
           <form
@@ -76,11 +86,11 @@ function DialogCard({ dialog, onClose }) {
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              className="w-full px-4 py-2 font-medium text-neutral-900 placeholder-neutral-400 border rounded-xl border-neutral-200 focus:outline-none focus:border-neutral-900"
+              className="w-full px-4 py-2 font-medium text-fg placeholder-fg-faint border rounded-xl border-line-strong focus:outline-none focus:border-primary"
             />
             <div className="flex gap-3 mt-5">
               <button type="button" onClick={cancel} className={cancelBtn}>Annuler</button>
-              <button type="submit" className="flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95">
+              <button type="submit" className="flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl bg-primary hover:bg-primary-hover active:scale-95">
                 {dialog.confirmLabel || "Enregistrer"}
               </button>
             </div>
@@ -91,7 +101,7 @@ function DialogCard({ dialog, onClose }) {
             <button
               type="button"
               onClick={() => onClose(true)}
-              className={`flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl active:scale-95 ${danger ? "bg-red-500 hover:bg-red-600" : "bg-neutral-900 hover:bg-black"}`}
+              className={`flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl active:scale-95 ${danger ? "bg-red-500 hover:bg-red-600" : "bg-primary hover:bg-primary-hover"}`}
             >
               {dialog.confirmLabel || "Confirmer"}
             </button>
@@ -102,7 +112,7 @@ function DialogCard({ dialog, onClose }) {
               type="button"
               autoFocus
               onClick={() => onClose(true)}
-              className="w-full py-3 text-sm font-bold text-white transition-all rounded-xl bg-neutral-900 hover:bg-black active:scale-95"
+              className="w-full py-3 text-sm font-bold text-white transition-all rounded-xl bg-primary hover:bg-primary-hover active:scale-95"
             >
               {isSuccess ? "Ok" : "Fermer"}
             </button>
@@ -151,7 +161,7 @@ export default function AdminDashboard() {
     name: "", slug: "", description: "", address: "", phone: "", opening_hours: {}
   });
   const [newServiceForm, setNewServiceForm] = useState({
-    name: "", description: "", duration_minutes: 30, price: 0
+    name: "", description: "", duration_minutes: 30, price: 0, category: ""
   });
   const [newBarberForm, setNewBarberForm] = useState({ name: "" });
 
@@ -167,6 +177,38 @@ export default function AdminDashboard() {
     openDialog({ kind: "confirm", title, message, confirmLabel, danger, cancelLabel });
   const askText = (title, message, initialValue = "", confirmLabel = "Enregistrer") =>
     openDialog({ kind: "prompt", title, message, initialValue, confirmLabel });
+
+  // ===== TEMA GRAFICO =====
+  // Tipo di negozio: parte dalla cache locale (vedi THEME_CACHE_KEY) e viene confermato dai dati del negozio
+  const [businessType, setBusinessType] = useState(() => localStorage.getItem(THEME_CACHE_KEY) || "barber");
+
+  // Appena il negozio è caricato, il suo business_type è quello vero: lo usiamo e lo ricordiamo
+  useEffect(() => {
+    if (!shopDetails) return;
+    const type = shopDetails.business_type || "barber";
+    setBusinessType(type);
+    localStorage.setItem(THEME_CACHE_KEY, type);
+  }, [shopDetails]);
+
+  // Applica il tema su <html> (come ShopPage, così vale anche per popup e overlay).
+  // Al logout o quando si lascia il gestionale l'attributo viene tolto e tornano i colori di default.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    document.documentElement.dataset.theme = businessType;
+
+    let fontLink = null;
+    if (businessType === "beauty") {
+      fontLink = document.createElement("link");
+      fontLink.rel = "stylesheet";
+      fontLink.href = BEAUTY_FONTS_URL;
+      document.head.appendChild(fontLink);
+    }
+
+    return () => {
+      delete document.documentElement.dataset.theme;
+      if (fontLink) fontLink.remove();
+    };
+  }, [businessType, isAuthenticated]);
 
   // Controllo del Token all'avvio
   useEffect(() => {
@@ -298,7 +340,7 @@ export default function AdminDashboard() {
     try {
       await createService(activeShopId, { ...newServiceForm, shop_id: activeShopId });
       await notify("success", "Service ajouté avec succès !");
-      setNewServiceForm({ name: "", description: "", duration_minutes: 30, price: 0 });
+      setNewServiceForm({ name: "", description: "", duration_minutes: 30, price: 0, category: "" });
       await loadDashboardData();
     } catch (err) {
       await notify("error", "Erreur lors de l'ajout du service.");
@@ -385,29 +427,30 @@ export default function AdminDashboard() {
 
   // 2. Se siamo loggati ma i dati stanno caricando
   if (isLoading && bookings.length === 0) {
-    return <div className="flex items-center justify-center min-h-screen font-medium bg-[#F0F2F5] text-neutral-500">Chargement du panneau d'administration...</div>;
+    return <div className="flex items-center justify-center min-h-screen font-medium bg-page text-fg-muted">Chargement du panneau d'administration...</div>;
   }
 
   // 3. Se c'è un errore fatale nel caricamento dati
   if (error) {
-    return <div className="flex items-center justify-center min-h-screen font-bold bg-[#F0F2F5] text-red-500">{error}</div>;
+    return <div className="flex items-center justify-center min-h-screen font-bold bg-page text-red-500">{error}</div>;
   }
 
   // 4. Renderizzazione normale della Dashboard
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-[#F0F2F5] font-sans">
+    <div className="min-h-screen p-4 md:p-8 bg-page font-sans">
       <div className="max-w-6xl mx-auto">
        
         {/* Intestazione e Tasto Logout */}
         <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">Tableau de bord du salon</h1>
-            <p className="mt-1 font-medium text-neutral-500">Gérez les rendez-vous, votre équipe et les informations publiques.</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-fg font-heading">Tableau de bord du salon</h1>
+            <p className="mt-1 font-medium text-fg-muted">Gérez les rendez-vous, votre équipe et les informations publiques.</p>
           </div>
           <button
             onClick={() => {
               localStorage.removeItem("admin_token");
               localStorage.removeItem("admin_shop_slug");
+              localStorage.removeItem(THEME_CACHE_KEY);
               // Svuota i dati del negozio: se poi entra un altro negozio non deve vedere quelli del precedente
               setShopSlug(null);
               setShopDetails(null);
@@ -415,6 +458,7 @@ export default function AdminDashboard() {
               setBarbers([]);
               setSelectedBarber(null);
               setDraftShifts([]);
+              setBusinessType("barber");
               setIsAuthenticated(false);
             }}
             className="px-4 py-2 text-sm font-bold text-red-600 transition-colors border border-red-200 rounded-xl hover:bg-red-50"
@@ -423,22 +467,22 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        <div className="flex gap-6 mb-8 overflow-x-auto border-b border-neutral-200 hide-scrollbar">
+        <div className="flex gap-6 mb-8 overflow-x-auto border-b border-line-strong hide-scrollbar">
           <button
             onClick={() => setActiveTab("bookings")}
-            className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'bookings' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}
+            className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'bookings' ? 'border-primary text-primary' : 'border-transparent text-fg-muted hover:text-fg'}`}
           >
             Rendez-vous
           </button>
           <button
             onClick={() => setActiveTab("shifts")}
-            className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'shifts' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}
+            className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'shifts' ? 'border-primary text-primary' : 'border-transparent text-fg-muted hover:text-fg'}`}
           >
             Horaires de l'équipe
           </button>
           <button
             onClick={() => setActiveTab("shop")}
-            className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'shop' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'}`}
+            className={`pb-3 font-bold text-[15px] whitespace-nowrap transition-all border-b-2 ${activeTab === 'shop' ? 'border-primary text-primary' : 'border-transparent text-fg-muted hover:text-fg'}`}
           >
             Salon et Services
           </button>

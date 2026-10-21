@@ -39,66 +39,72 @@ export default function ShopDettagli({ shop, onClose }) {
     };
   });
 
+  // NUOVO: testo di benvenuto usato solo se il negozio non ha una descrizione.
+  // Il testo per i barbieri resta quello di prima; i saloni di bellezza hanno il loro.
+  const defaultDescription = shop.business_type === "beauty"
+    ? `Bienvenue chez ${shop.name}. Notre institut vous accueille dans une atmosphère douce et raffinée, pensée pour votre bien-être. Nous proposons des soins et des services d'excellence, réalisés avec soin et passion.`
+    : `Bienvenue chez ${shop.name}. Notre salon est né de l'idée d'offrir une atmosphère intime et relaxante, alliant la tradition du barbier classique aux techniques les plus modernes. Nous proposons des services d'excellence et des soins spécifiques.`;
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white animate-fade-up">
      
       {/* HEADER STICKY CON FRECCIA INDIETRO */}
-      <div className="sticky top-0 z-10 flex items-center p-4 bg-white border-b border-neutral-200">
-        <button onClick={onClose} className="p-2 mr-2 transition rounded-full text-neutral-600 hover:bg-neutral-100">
-          <svg className="w-6 h-6 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="sticky top-0 z-10 flex items-center p-4 bg-white border-b border-line-strong">
+        <button onClick={onClose} className="p-2 mr-2 transition rounded-full text-fg-2 hover:bg-tint-2">
+          <svg className="w-6 h-6 text-fg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
         </button>
-        <h2 className="text-lg font-bold tracking-tight text-neutral-900">Détails du salon</h2>
+        <h2 className="text-lg font-bold tracking-tight text-fg font-heading">Détails du salon</h2>
       </div>
 
       <div className="w-full max-w-3xl flex-1 p-5 mx-auto">
        
         {/* INDIRIZZO */}
-        <div className="flex items-start justify-between pb-6 mb-8 border-b border-neutral-200">
+        <div className="flex items-start justify-between pb-6 mb-8 border-b border-line-strong">
           {/* Indirizzo diventato cliccabile */}
           <a
             href={`https://maps.google.com/?q=${shop.address}`}
             target="_blank"
             rel="noreferrer"
-            className="text-[15px] leading-relaxed text-neutral-600 hover:text-neutral-900 transition-colors"
+            className="text-[15px] leading-relaxed text-fg-2 hover:text-fg transition-colors"
           >
             {shop.address}<br />
            
           </a>
-          <a href={`https://maps.google.com/?q=${shop.address}`} target="_blank" rel="noreferrer" className="text-sm font-bold transition-colors text-neutral-900 hover:text-black hover:underline">
+          <a href={`https://maps.google.com/?q=${shop.address}`} target="_blank" rel="noreferrer" className="text-sm font-bold transition-colors text-primary hover:text-primary-hover hover:underline">
             Carte
           </a>
         </div>
 
 {/* RECAPITI (NUOVA SEZIONE) */}
-        <div className="pb-6 mb-8 border-b border-neutral-200">
-          <h3 className="mb-4 text-lg font-bold text-neutral-900">Coordonnées</h3>
+        <div className="pb-6 mb-8 border-b border-line-strong">
+          <h3 className="mb-4 text-lg font-bold text-fg font-heading">Coordonnées</h3>
           <div className="flex flex-col gap-3 text-[15px]">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-neutral-800">Tél :</span>
+              <span className="font-bold text-fg">Tél :</span>
               {shop.phone ? (
-                <a href={`tel:${shop.phone}`} className="text-neutral-600 transition-colors hover:text-neutral-900 hover:underline">
+                <a href={`tel:${shop.phone}`} className="text-fg-2 transition-colors hover:text-fg hover:underline">
                   {shop.phone}
                 </a>
               ) : (
-                <span className="text-neutral-400">Non renseigné</span>
+                <span className="text-fg-faint">Non renseigné</span>
               )}
             </div>
           </div>
         </div>
 
         {/* IL TEAM */}
-        <div className="pb-6 mb-8 border-b border-neutral-200">
-          <h3 className="mb-6 text-lg font-bold text-neutral-900">L'équipe</h3>
+        <div className="pb-6 mb-8 border-b border-line-strong">
+          <h3 className="mb-6 text-lg font-bold text-fg font-heading">L'équipe</h3>
           <div className="flex gap-6 overflow-x-auto hide-scrollbar">
             {shop.barbers && shop.barbers.map((barber) => (
               <div key={barber.id} className="flex flex-col items-center min-w-[80px]">
-                <div className="flex items-center justify-center mb-3 text-2xl font-bold text-white shadow-md w-20 h-20 rounded-full bg-gradient-to-br from-neutral-900 to-neutral-700">
+                <div className="flex items-center justify-center mb-3 text-2xl font-bold text-white shadow-md w-20 h-20 rounded-full bg-gradient-to-br from-grad-start to-avatar-end">
                   {getInitials(barber.name)}
                 </div>
-                <span className="font-bold text-neutral-800">{barber.name}</span>
-                <button className="px-5 py-1.5 mt-3 text-sm font-bold transition-colors border-2 rounded-lg border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white">
+                <span className="font-bold text-fg">{barber.name}</span>
+                <button className="px-5 py-1.5 mt-3 text-sm font-bold transition-colors border-2 rounded-lg border-primary text-primary hover:bg-primary hover:text-white">
                   Voir
                 </button>
               </div>
@@ -107,20 +113,20 @@ export default function ShopDettagli({ shop, onClose }) {
         </div>
 
         {/* ORARI DI APERTURA (Internazionalizzati) */}
-        <div className="pb-6 mb-8 border-b border-neutral-200">
-          <h3 className="mb-5 text-lg font-bold text-neutral-900">Horaires d'ouverture</h3>
+        <div className="pb-6 mb-8 border-b border-line-strong">
+          <h3 className="mb-5 text-lg font-bold text-fg font-heading">Horaires d'ouverture</h3>
           <div className="flex flex-col gap-3 text-[15px]">
             {orari.map((o, idx) => (
               <div key={idx} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {o.aperto ? (
-                    <div className="w-3.5 h-3.5 bg-neutral-900 rounded-full shadow-sm"></div>
+                    <div className="w-3.5 h-3.5 bg-primary rounded-full shadow-sm"></div>
                   ) : (
-                    <div className="w-3.5 h-3.5 border-2 border-neutral-300 rounded-full"></div>
+                    <div className="w-3.5 h-3.5 border-2 border-fg-ghost rounded-full"></div>
                   )}
-                  <span className={o.aperto ? "font-medium text-neutral-900" : "text-neutral-500"}>{o.giorno}</span>
+                  <span className={o.aperto ? "font-medium text-fg" : "text-fg-muted"}>{o.giorno}</span>
                 </div>
-                <span className={o.aperto ? "font-bold text-neutral-900" : "font-medium text-neutral-400"}>{o.ore}</span>
+                <span className={o.aperto ? "font-bold text-fg" : "font-medium text-fg-faint"}>{o.ore}</span>
               </div>
             ))}
           </div>
@@ -128,11 +134,11 @@ export default function ShopDettagli({ shop, onClose }) {
 
         {/* DESCRIZIONE */}
         <div className="mb-10">
-          <h3 className="mb-4 text-lg font-bold text-neutral-900">Description</h3>
-          <p className="text-[15px] leading-relaxed text-justify text-neutral-600 whitespace-pre-wrap">
+          <h3 className="mb-4 text-lg font-bold text-fg font-heading">Description</h3>
+          <p className="text-[15px] leading-relaxed text-justify text-fg-2 whitespace-pre-wrap">
             {shop.description
               ? shop.description
-              : `Bienvenue chez ${shop.name}. Notre salon est né de l'idée d'offrir une atmosphère intime et relaxante, alliant la tradition du barbier classique aux techniques les plus modernes. Nous proposons des services d'excellence et des soins spécifiques.`
+              : defaultDescription
             }
           </p>
         </div>
