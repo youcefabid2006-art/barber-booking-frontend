@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Ci serve per reindirizzare all'AdminDash
 import ShopPrenotazioni from "./ShopPrenotazioni";
+import ShopCatalogo from "./ShopCatalogo"; // NUOVO: sezione Boutique (catalogo prodotti)
 
 // Funzione di utility per decodificare il JWT Token nel browser
 function parseJwt(token) {
@@ -18,6 +19,7 @@ function parseJwt(token) {
 
 export default function ShopVetrina({ shop, onOpenDetails }) {
   const [showPrenotazioni, setShowPrenotazioni] = useState(false);
+  const [showBoutique, setShowBoutique] = useState(false); // NUOVO: overlay Boutique (come showPrenotazioni)
   const [isAdminAuth, setIsAdminAuth] = useState(false);
   const navigate = useNavigate();
 
@@ -37,6 +39,10 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
   }, [shop]);
 
   if (!shop) return null;
+
+  // NUOVO: la Boutique compare nella nav bar solo se il negozio ha almeno un prodotto
+  // (i negozi senza catalogo restano esattamente come prima)
+  const hasBoutique = Array.isArray(shop.products) && shop.products.length > 0;
 
   const fallbackImage = "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=2400&q=80";
   const coverImage = shop.images && shop.images.length > 0 ? shop.images[0] : fallbackImage;
@@ -170,7 +176,7 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 
       {/* BOTTOM NAVIGATION BAR FISSA */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-white border-t border-line shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
-      <div className={`${isAdminAuth ? "grid grid-cols-3 items-center justify-items-center" : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
+      <div className={`${isAdminAuth ? (hasBoutique ? "grid grid-cols-4 items-center justify-items-center" : "grid grid-cols-3 items-center justify-items-center") : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
          
           {/* Tasto HOME */}
           <button
@@ -194,6 +200,19 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
             <span className="text-[10px] font-bold tracking-wide uppercase">Réservations</span>
           </button>
 
+          {/* Tasto BOUTIQUE (NUOVO: visibile solo se il negozio ha dei prodotti) */}
+          {hasBoutique && (
+            <button
+              onClick={() => setShowBoutique(true)}
+              className="flex flex-col items-center justify-center p-2 transition-colors text-fg-faint hover:text-primary group"
+            >
+              <svg className="w-6 h-6 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="text-[10px] font-bold tracking-wide uppercase">Boutique</span>
+            </button>
+          )}
+
           {/* Tasto IMPOSTAZIONI (Visibile SOLO all'Admin) */}
           {isAdminAuth && (
             <button
@@ -213,7 +232,24 @@ export default function ShopVetrina({ shop, onOpenDetails }) {
 
       {/* OVERLAY PRENOTAZIONI */}
       {showPrenotazioni && (
-        <ShopPrenotazioni shopId={shop.id} services={shop.services} isAdminAuth={isAdminAuth} onHome={() => setShowPrenotazioni(false)} />
+        <ShopPrenotazioni
+          shopId={shop.id}
+          services={shop.services}
+          isAdminAuth={isAdminAuth}
+          onHome={() => setShowPrenotazioni(false)}
+          onOpenShop={hasBoutique ? () => { setShowPrenotazioni(false); setShowBoutique(true); } : undefined}
+        />
+      )}
+
+      {/* OVERLAY BOUTIQUE (NUOVO) */}
+      {showBoutique && hasBoutique && (
+        <ShopCatalogo
+          shopId={shop.id}
+          products={shop.products}
+          isAdminAuth={isAdminAuth}
+          onHome={() => setShowBoutique(false)}
+          onOpenPrenotazioni={() => { setShowBoutique(false); setShowPrenotazioni(true); }}
+        />
       )}
     </>
   );

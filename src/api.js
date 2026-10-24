@@ -167,3 +167,23 @@ export async function deleteBarber(barberId) {
   const { data } = await axios.delete(`${API_BASE}/admin/barbers/${barberId}`);
   return data;
 }
+
+// ==========================================
+// NUOVO: PRODOTTI DELLA BOUTIQUE (rotte Admin: il token lo aggiunge l'intercettatore in cima al file)
+// Per ora nessun componente le usa: servono alla gestione del catalogo nella dashboard.
+// payload = { name, description, price, category, image_url } (in più shop_id solo per createProduct)
+// ==========================================
+export async function createProduct(shopId, payload) {
+  const { data } = await axios.post(`${API_BASE}/admin/shops/${shopId}/products`, payload);
+  return data;
+}
+
+export async function updateProduct(productId, payload) {
+  const { data } = await axios.put(`${API_BASE}/admin/products/${productId}`, payload);
+  return data;
+}
+
+export async function deleteProduct(productId) {
+  const { data } = await axios.delete(`${API_BASE}/admin/products/${productId}`);
+  return data;
+}

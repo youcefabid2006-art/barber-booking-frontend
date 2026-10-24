@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { getUserBookings } from "../api";
 import { useNavigate } from "react-router-dom";
 
-export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, onHome }) {
+// NUOVO: onOpenShop (opzionale) apre la Boutique; se non viene passata (negozio senza prodotti) il tasto non compare
+export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, onHome, onOpenShop }) {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const hasShop = typeof onOpenShop === "function";
 
   // Caricamento delle prenotazioni all'apertura della scheda
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
 
 {/* BOTTOM NAVIGATION BAR */}
       <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-line shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pb-safe pt-2">
-        <div className={`${isAdminAuth ? "grid grid-cols-3 items-center justify-items-center" : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
+        <div className={`${isAdminAuth ? (hasShop ? "grid grid-cols-4 items-center justify-items-center" : "grid grid-cols-3 items-center justify-items-center") : "flex items-center justify-around"} max-w-md px-6 pb-2 mx-auto`}>
          
           <button
             onClick={onHome}
@@ -167,6 +169,20 @@ export default function ShopPrenotazioni({ shopId, services = [], isAdminAuth, o
             </svg>
             <span className="text-[10px] font-bold tracking-wide uppercase">Réservations</span>
           </button>
+
+          {/* Tasto BOUTIQUE (NUOVO: compare solo se il negozio ha dei prodotti) */}
+          {hasShop && (
+            <button
+              onClick={onOpenShop}
+              className="flex flex-col items-center justify-center p-2 transition-colors text-fg-faint hover:text-primary group"
+            >
+              <svg className="w-6 h-6 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="text-[10px] font-bold tracking-wide uppercase">Boutique</span>
+            </button>
+          )}
+
           {/* Tasto IMPOSTAZIONI (Visibile SOLO all'Admin) */}
           {isAdminAuth && (
             <button

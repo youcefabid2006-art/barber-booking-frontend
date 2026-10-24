@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   getAdminBookings, deleteAdminBooking, getAdminBarbers, updateBarberShifts,
   getShopBySlug, updateShopDetails, createService, updateService, deleteService, createBarber,
-  updateBarber, deleteBarber
+  updateBarber, deleteBarber,
+  createProduct, updateProduct, deleteProduct // NUOVO: prodotti della Boutique
 } from "../api";
 
 import ShopAppuntamenti_ad from "../components_admin/ShopAppuntamenti_ad.jsx";
@@ -162,6 +163,10 @@ export default function AdminDashboard() {
   });
   const [newServiceForm, setNewServiceForm] = useState({
     name: "", description: "", duration_minutes: 30, price: 0, category: ""
+  });
+  // NUOVO: modulo "Nouveau produit" (il prezzo resta testo finché non si salva, poi viene convertito in numero)
+  const [newProductForm, setNewProductForm] = useState({
+    name: "", description: "", price: "", category: "", image_url: ""
   });
   const [newBarberForm, setNewBarberForm] = useState({ name: "" });
 
@@ -371,6 +376,59 @@ export default function AdminDashboard() {
     }
   };
 
+  // ===== NUOVO: PRODOTTI DELLA BOUTIQUE (stessa logica dei servizi) =====
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    const price = parseFloat(newProductForm.price);
+    if (Number.isNaN(price) || price < 0) {
+      return notify("error", "Veuillez saisir un prix valide.", "Prix invalide");
+    }
+    try {
+      await createProduct(activeShopId, {
+        shop_id: activeShopId,
+        name: newProductForm.name.trim(),
+        description: newProductForm.description.trim(),
+        price,
+        category: newProductForm.category.trim(),
+        image_url: newProductForm.image_url.trim()
+      });
+      await notify("success", "Produit ajouté avec succès !");
+      setNewProductForm({ name: "", description: "", price: "", category: "", image_url: "" });
+      await loadDashboardData();
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      await notify("error", typeof detail === "string" ? detail : "Erreur lors de l'ajout du produit.");
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (!(await askConfirm("Supprimer le produit", "Voulez-vous vraiment supprimer ce produit ?", "Supprimer"))) return;
+    try {
+      await deleteProduct(productId);
+      await loadDashboardData();
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la suppression du produit.");
+    }
+  };
+
+  // Modifica di un prodotto (nome, descrizione, prezzo, categoria, immagine). Ritorna true se è andata a buon fine.
+  const handleUpdateProduct = async (productId, data) => {
+    if (Number.isNaN(data.price) || data.price < 0) {
+      await notify("error", "Veuillez saisir un prix valide.", "Prix invalide");
+      return false;
+    }
+    try {
+      await updateProduct(productId, data);
+      await loadDashboardData();
+      return true;
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la modification du produit.");
+      return false;
+    }
+  };
+
   const handleAddBarber = async (e) => {
     e.preventDefault();
     if(!newBarberForm.name.trim()) return;
@@ -532,6 +590,11 @@ export default function AdminDashboard() {
             handleAddService={handleAddService}
             handleDeleteService={handleDeleteService}
             handleUpdateService={handleUpdateService}
+            newProductForm={newProductForm}
+            setNewProductForm={setNewProductForm}
+            handleAddProduct={handleAddProduct}
+            handleDeleteProduct={handleDeleteProduct}
+            handleUpdateProduct={handleUpdateProduct}
           />
         )}
 
