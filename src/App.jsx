@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ShopPage from "./pages/ShopPage";
 import AdminDash from "./pages/AdminDash";
+import MasterDash from "./pages/MasterDash"; // NUOVO
 
 export default function App() {
   return (
@@ -8,6 +9,7 @@ export default function App() {
       <Routes>
         <Route path="/shop/:slug" element={<ShopPage />} />
         <Route path="/admin" element={<AdminDash shopId={1} />} />
+        <Route path="/master" element={<MasterDash />} />
       </Routes>
     </BrowserRouter>
   );

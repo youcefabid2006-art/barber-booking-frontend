@@ -187,3 +187,79 @@ export async function deleteProduct(productId) {
   const { data } = await axios.delete(`${API_BASE}/admin/products/${productId}`);
   return data;
 }
+
+// ==========================================
+// NUOVO: DASHBOARD MASTER (rotte /master/...)
+// Si entra con username fisso + MASTER_KEY come password (masterLogin): il backend risponde con un token,
+// che resta in sessionStorage (sparisce chiudendo la scheda) e va in "Authorization: Bearer" a ogni chiamata master.
+// Non passa dall'intercettatore in cima al file (che riguarda solo le rotte "/admin/"): lo aggiungiamo
+// chiamata per chiamata con masterConfig(). Il token master NON è il token admin dei negozi: chiave diversa in storage.
+// ==========================================
+const MASTER_TOKEN_STORAGE = "master_token";
+
+export function getMasterToken() {
+  return sessionStorage.getItem(MASTER_TOKEN_STORAGE) || "";
+}
+
+export function saveMasterToken(token) {
+  sessionStorage.setItem(MASTER_TOKEN_STORAGE, token);
+}
+
+export function clearMasterToken() {
+  sessionStorage.removeItem(MASTER_TOKEN_STORAGE);
+}
+
+function masterConfig() {
+  return { headers: { Authorization: `Bearer ${getMasterToken()}` } };
+}
+
+// Login: stesso formato del login admin (form con username e password). Restituisce { access_token, token_type }
+export async function masterLogin(username, password) {
+  const body = new URLSearchParams();
+  body.append("username", username);
+  body.append("password", password);
+  const { data } = await axios.post(`${API_BASE}/master/login`, body);
+  return data;
+}
+
+// Tutti i negozi in ordine di id (con tutti i dati della scheda e has_password)
+export async function masterGetShops() {
+  const { data } = await axios.get(`${API_BASE}/master/shops`, masterConfig());
+  return data;
+}
+
+// payload = { name, slug, business_type, description, address, phone, instagram_url, facebook_url,
+//             whatsapp_number, opening_hours, images } (in più password, opzionale, solo per la creazione)
+export async function masterCreateShop(payload) {
+  const { data } = await axios.post(`${API_BASE}/master/shops`, payload, masterConfig());
+  return data;
+}
+
+export async function masterUpdateShop(shopId, payload) {
+  const { data } = await axios.put(`${API_BASE}/master/shops/${shopId}`, payload, masterConfig());
+  return data;
+}
+
+export async function masterDeleteShop(shopId) {
+  await axios.delete(`${API_BASE}/master/shops/${shopId}`, masterConfig());
+  return true;
+}
+
+export async function masterSetPassword(shopId, password) {
+  const { data } = await axios.put(`${API_BASE}/master/shops/${shopId}/password`, { password }, masterConfig());
+  return data;
+}
+
+// Restituisce { access_token, slug }: lo stesso token che dà il login admin di quel negozio
+export async function masterGetAdminToken(shopId) {
+  const { data } = await axios.post(`${API_BASE}/master/shops/${shopId}/admin-token`, null, masterConfig());
+  return data;
+}
+
+// Carica un file immagine e restituisce { url } (link pubblico su Supabase Storage)
+export async function masterUploadImage(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await axios.post(`${API_BASE}/master/upload-image`, formData, masterConfig());
+  return data;
+}
