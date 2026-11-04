@@ -1,134 +1,30 @@
 import React, { useState, useEffect } from "react";
-import {
-  getAdminBookings, deleteAdminBooking, getAdminBarbers, updateBarberShifts,
-  getShopBySlug, updateShopDetails, createService, updateService, deleteService, createBarber,
-  updateBarber, deleteBarber,
-  createProduct, updateProduct, deleteProduct // NUOVO: prodotti della Boutique
-} from "../api";
+import { getAdminBookings, getAdminBarbers, getShopBySlug } from "../api";
 
+import useAdminDialog from "../hooks/useAdminDialog";
+import useShopTheme from "../hooks/useShopTheme";
+import useAppuntamentiAdmin from "../hooks/useAppuntamentiAdmin";
+import useTeamAdmin from "../hooks/useTeamAdmin";
+import useNegozioAdmin from "../hooks/useNegozioAdmin";
+
+import AdminDialog from "../components_admin/AdminDialog.jsx";
 import ShopAppuntamenti_ad from "../components_admin/ShopAppuntamenti_ad.jsx";
 import ShopTeam_ad from "../components_admin/ShopTeam_ad.jsx";
-import ShopNegozio_ad from "../components_admin/ShopNegozio_ad.jsx";
+import ShopNegozio_ad from "../components_admin/negozio/ShopNegozio_ad.jsx";
 // IMPORTIAMO LA NUOVA PAGINA DI LOGIN
 import ShopLogin_ad from "../components_admin/ShopLogin_ad.jsx";
 
-const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-
-// ===== TEMA GRAFICO DEL GESTIONALE =====
-// Come nella pagina pubblica (ShopPage): il tema dipende da shop.business_type ("barber" di default oppure "beauty")
-// e si applica con l'attributo data-theme su <html>. Colori e font arrivano dai token di index.css.
-// Font dei saloni di bellezza (gli stessi di ShopPage): si caricano SOLO per i negozi "beauty".
-const BEAUTY_FONTS_URL =
-  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap";
 // Il tipo di negozio si ricorda in localStorage solo per dare i colori giusti anche alla schermata di caricamento
 // (il valore vero arriva comunque dal negozio, appena caricato)
 const THEME_CACHE_KEY = "admin_business_type";
 
-// ===== POPUP NELLO STILE DELLA PAGINA (al posto di alert / confirm / prompt del browser) =====
-let dialogSeq = 0;
-
-const DIALOG_ICONS = {
-  success: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-  error: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-  delete: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
-  edit: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-};
-
-function DialogCard({ dialog, onClose }) {
-  const [text, setText] = useState(dialog.initialValue || "");
-  const isPrompt = dialog.kind === "prompt";
-  const isConfirm = dialog.kind === "confirm";
-  const isMessage = dialog.kind === "message";
-  const isSuccess = isMessage && dialog.type === "success";
-  const isError = isMessage && dialog.type === "error";
-  const danger = isConfirm && dialog.danger !== false;
-
-  const title = dialog.title || (isSuccess ? "Terminé !" : "Une erreur est survenue");
-  const iconPath = isSuccess ? DIALOG_ICONS.success : isError ? DIALOG_ICONS.error : isConfirm ? DIALOG_ICONS.delete : DIALOG_ICONS.edit;
-  const iconTone = isSuccess ? "bg-green-50 text-green-600" : (isError || danger) ? "bg-red-50 text-red-500" : "bg-tint-2 text-primary";
-
-  const cancel = () => onClose(isPrompt ? null : isConfirm ? false : true);
-
-  // Chiusura con il tasto Esc (utile da computer)
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") cancel();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  const cancelBtn = "flex-1 py-3 text-sm font-bold transition-colors rounded-xl text-fg-2 bg-tint-2 hover:bg-line-strong active:scale-95";
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="absolute inset-0 bg-black/40" onClick={cancel} />
-
-      <div className="relative w-full max-w-sm p-6 text-center bg-white border shadow-2xl rounded-2xl border-line-strong">
-        <div className={`flex items-center justify-center mx-auto mb-4 rounded-full w-14 h-14 ${iconTone}`}>
-          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />
-          </svg>
-        </div>
-
-        <h3 className="mb-1 text-lg font-extrabold text-fg font-heading">{title}</h3>
-        {dialog.message && <p className="text-sm font-medium break-words text-fg-muted">{dialog.message}</p>}
-
-        {isPrompt ? (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              onClose(text);
-            }}
-            className="mt-5"
-          >
-            <input
-              autoFocus
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              className="w-full px-4 py-2 font-medium text-fg placeholder-fg-faint border rounded-xl border-line-strong focus:outline-none focus:border-primary"
-            />
-            <div className="flex gap-3 mt-5">
-              <button type="button" onClick={cancel} className={cancelBtn}>Annuler</button>
-              <button type="submit" className="flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl bg-primary hover:bg-primary-hover active:scale-95">
-                {dialog.confirmLabel || "Enregistrer"}
-              </button>
-            </div>
-          </form>
-        ) : isConfirm ? (
-          <div className="flex gap-3 mt-6">
-            <button type="button" autoFocus={danger} onClick={cancel} className={cancelBtn}>{dialog.cancelLabel || "Annuler"}</button>
-            <button
-              type="button"
-              onClick={() => onClose(true)}
-              className={`flex-1 py-3 text-sm font-bold text-white transition-all rounded-xl active:scale-95 ${danger ? "bg-red-500 hover:bg-red-600" : "bg-primary hover:bg-primary-hover"}`}
-            >
-              {dialog.confirmLabel || "Confirmer"}
-            </button>
-          </div>
-        ) : (
-          <div className="mt-6">
-            <button
-              type="button"
-              autoFocus
-              onClick={() => onClose(true)}
-              className="w-full py-3 text-sm font-bold text-white transition-all rounded-xl bg-primary hover:bg-primary-hover active:scale-95"
-            >
-              {isSuccess ? "Ok" : "Fermer"}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DialogHost({ dialog, onClose }) {
-  if (!dialog) return null;
-  return <DialogCard key={dialog.id} dialog={dialog} onClose={onClose} />;
-}
-
+// ===== IL GESTIONALE: AUTENTICAZIONE, CARICAMENTO DATI E LAYOUT =====
+// Qui restano: il login, il caricamento dei dati del negozio (loadDashboardData), l'intestazione con le tab.
+// La logica di ogni tab è in un hook dedicato (cartella hooks/):
+//   - Rendez-vous            -> useAppuntamentiAdmin
+//   - Horaires de l'équipe   -> useTeamAdmin
+//   - Salon et Services      -> useNegozioAdmin
+// Lo stato di tutte le tab vive qui dentro, quindi cambiare tab non fa perdere nulla.
 export default function AdminDashboard() {
   // ===== NUOVO STATO DI AUTENTICAZIONE =====
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -139,49 +35,36 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Stati Appuntamenti
-  const [bookings, setBookings] = useState([]);
-  const todayString = new Date().toISOString().split('T')[0];
-  const [filterDate, setFilterDate] = useState(todayString);
-  const [isDeleting, setIsDeleting] = useState(null);
-
-  // Stati Orari
-  const [barbers, setBarbers] = useState([]);
-  const [selectedBarber, setSelectedBarber] = useState(null);
-  const [draftShifts, setDraftShifts] = useState([]);
-  const [isSavingShifts, setIsSavingShifts] = useState(false);
-  const [newShiftInputs, setNewShiftInputs] = useState(
-    WEEKDAYS.reduce((acc, _, i) => ({ ...acc, [i]: { start: "", end: "" } }), {})
-  );
-
-  // Stati Negozio
-  const [shopDetails, setShopDetails] = useState(null);
-  // Id del negozio loggato: si ricava dal negozio caricato tramite slug (disponibile dopo loadDashboardData)
-  const activeShopId = shopDetails?.id;
-  const [shopForm, setShopForm] = useState({
-    name: "", slug: "", description: "", address: "", phone: "", opening_hours: {}
-  });
-  const [newServiceForm, setNewServiceForm] = useState({
-    name: "", description: "", duration_minutes: 30, price: 0, category: ""
-  });
-  // NUOVO: modulo "Nouveau produit" (il prezzo resta testo finché non si salva, poi viene convertito in numero)
-  const [newProductForm, setNewProductForm] = useState({
-    name: "", description: "", price: "", category: "", image_url: ""
-  });
-  const [newBarberForm, setNewBarberForm] = useState({ name: "" });
-
   // Popup nello stile della pagina: ritornano una Promise, come alert / confirm / prompt
-  const [dialog, setDialog] = useState(null);
-  const openDialog = (config) => new Promise((resolve) => setDialog({ ...config, resolve, id: ++dialogSeq }));
-  const closeDialog = (result) => {
-    if (dialog) dialog.resolve(result);
-    setDialog(null);
-  };
-  const notify = (type, message, title) => openDialog({ kind: "message", type, message, title });
-  const askConfirm = (title, message, confirmLabel = "Confirmer", danger = true, cancelLabel = "Annuler") =>
-    openDialog({ kind: "confirm", title, message, confirmLabel, danger, cancelLabel });
-  const askText = (title, message, initialValue = "", confirmLabel = "Enregistrer") =>
-    openDialog({ kind: "prompt", title, message, initialValue, confirmLabel });
+  const { dialog, closeDialog, notify, askConfirm, askText } = useAdminDialog();
+
+  // Collaboratori del negozio (servono sia alla tab dei turni sia alla tab del negozio)
+  const [barbers, setBarbers] = useState([]);
+
+  // Dati e azioni di ogni tab.
+  // "reload: loadDashboardData" funziona anche se la funzione è scritta più sotto: le funzioni dichiarate con "function" sono già disponibili.
+  // AGENDA (tab Rendez-vous): vista, data, filtri e ricerca vivono nell'hook insieme all'elenco delle prenotazioni.
+  const {
+    bookings, setBookings,
+    view, setView, selectedDate, setSelectedDate,
+    filterBarber, setFilterBarber, filterService, setFilterService,
+    search, setSearch, listScope, setListScope, resetFilters,
+    isDeleting, filteredBookings, handleDelete
+  } = useAppuntamentiAdmin({ notify, askConfirm });
+
+  const {
+    selectedBarber, setSelectedBarber, draftShifts, setDraftShifts, isSavingShifts,
+    newShiftInputs, setNewShiftInputs,
+    handleSelectBarber, handleAddShift, handleRemoveShift, handleSaveShifts
+  } = useTeamAdmin({ notify, reload: loadDashboardData });
+
+  const {
+    shopDetails, setShopDetails, shopForm, setShopForm,
+    newServiceForm, setNewServiceForm, newProductForm, setNewProductForm, newBarberForm, setNewBarberForm,
+    handleSaveShopInfo, handleAddService, handleDeleteService, handleUpdateService,
+    handleAddProduct, handleDeleteProduct, handleUpdateProduct,
+    handleAddBarber, handleUpdateBarber, handleDeleteBarber, handleOpeningHoursChange
+  } = useNegozioAdmin({ notify, askConfirm, askText, reload: loadDashboardData });
 
   // ===== TEMA GRAFICO =====
   // Tipo di negozio: parte dalla cache locale (vedi THEME_CACHE_KEY) e viene confermato dai dati del negozio
@@ -197,23 +80,7 @@ export default function AdminDashboard() {
 
   // Applica il tema su <html> (come ShopPage, così vale anche per popup e overlay).
   // Al logout o quando si lascia il gestionale l'attributo viene tolto e tornano i colori di default.
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    document.documentElement.dataset.theme = businessType;
-
-    let fontLink = null;
-    if (businessType === "beauty") {
-      fontLink = document.createElement("link");
-      fontLink.rel = "stylesheet";
-      fontLink.href = BEAUTY_FONTS_URL;
-      document.head.appendChild(fontLink);
-    }
-
-    return () => {
-      delete document.documentElement.dataset.theme;
-      if (fontLink) fontLink.remove();
-    };
-  }, [businessType, isAuthenticated]);
+  useShopTheme(isAuthenticated ? businessType : null);
 
   // Controllo del Token all'avvio
   useEffect(() => {
@@ -271,200 +138,30 @@ export default function AdminDashboard() {
     }
   }
 
-  // --- FUNZIONI DI GESTIONE INVARIATE ---
-  const handleDelete = async (appointmentId) => {
-    const conferma = await askConfirm("Annuler la réservation", "Êtes-vous sûr de vouloir annuler cette réservation ?", "Oui, annuler", true, "Retour");
-    if (!conferma) return;
-    setIsDeleting(appointmentId);
+  // AGENDA: ricarica SOLO le prenotazioni (pulsante "Actualiser" dell'agenda).
+  // Non tocca turni, collaboratori né dati del negozio, quindi le modifiche non salvate nelle altre tab restano.
+  async function refreshBookings() {
+    if (!shopDetails) return;
     try {
-      await deleteAdminBooking(appointmentId);
-      setBookings(prev => prev.filter(b => b.id !== appointmentId));
+      setBookings(await getAdminBookings(shopDetails.id));
     } catch (err) {
-      await notify("error", "Erreur lors de l'annulation.");
-    } finally {
-      setIsDeleting(null);
+      await notify("error", "Erreur de connexion au serveur.");
     }
-  };
+  }
 
-  const filteredBookings = filterDate
-    ? bookings.filter(b => b.start_datetime.startsWith(filterDate))
-    : bookings;
-
-  const handleSelectBarber = (barber) => {
-    setSelectedBarber(barber);
-    setDraftShifts(barber.shifts || []);
-    setNewShiftInputs(WEEKDAYS.reduce((acc, _, i) => ({ ...acc, [i]: { start: "", end: "" } }), {}));
-  };
-
-  const handleAddShift = (weekday) => {
-    const { start, end } = newShiftInputs[weekday];
-    if (!start || !end) return notify("error", "Veuillez saisir l'heure de début et de fin.", "Horaire manquant");
-    if (start >= end) return notify("error", "L'heure de fin doit être postérieure à l'heure de début.", "Horaire invalide");
-    const newShift = {
-      barber_id: selectedBarber.id,
-      weekday: weekday,
-      start_time: start.length === 5 ? `${start}:00` : start,
-      end_time: end.length === 5 ? `${end}:00` : end,
-    };
-    setDraftShifts([...draftShifts, newShift]);
-    setNewShiftInputs({ ...newShiftInputs, [weekday]: { start: "", end: "" } });
-  };
-
-  const handleRemoveShift = (indexToRemove) => {
-    setDraftShifts(draftShifts.filter((_, idx) => idx !== indexToRemove));
-  };
-
-  const handleSaveShifts = async () => {
-    setIsSavingShifts(true);
-    try {
-      await updateBarberShifts(selectedBarber.id, draftShifts);
-      setIsSavingShifts(false);
-      await notify("success", "Horaires mis à jour avec succès !");
-      await loadDashboardData();
-    } catch (err) {
-      setIsSavingShifts(false);
-      await notify("error", "Erreur lors de l'enregistrement des horaires.");
-    } finally {
-      setIsSavingShifts(false);
-    }
-  };
-
-  const handleSaveShopInfo = async (e) => {
-    e.preventDefault();
-    try {
-      await updateShopDetails(activeShopId, shopForm);
-      await notify("success", "Informations du salon mises à jour avec succès !");
-      await loadDashboardData();
-    } catch (err) {
-      await notify("error", "Erreur lors de la mise à jour du salon.");
-    }
-  };
-
-  const handleAddService = async (e) => {
-    e.preventDefault();
-    try {
-      await createService(activeShopId, { ...newServiceForm, shop_id: activeShopId });
-      await notify("success", "Service ajouté avec succès !");
-      setNewServiceForm({ name: "", description: "", duration_minutes: 30, price: 0, category: "" });
-      await loadDashboardData();
-    } catch (err) {
-      await notify("error", "Erreur lors de l'ajout du service.");
-    }
-  };
-
-  const handleDeleteService = async (serviceId) => {
-    if (!(await askConfirm("Supprimer le service", "Voulez-vous vraiment supprimer ce service ?", "Supprimer"))) return;
-    try {
-      await deleteService(serviceId);
-      await loadDashboardData();
-    } catch (err) {
-      const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la suppression du service.");
-    }
-  };
-
-  // Modifica di un servizio (nome, descrizione, durata, prezzo). Ritorna true se è andata a buon fine.
-  const handleUpdateService = async (serviceId, data) => {
-    try {
-      await updateService(serviceId, data);
-      await loadDashboardData();
-      return true;
-    } catch (err) {
-      const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la modification du service.");
-      return false;
-    }
-  };
-
-  // ===== NUOVO: PRODOTTI DELLA BOUTIQUE (stessa logica dei servizi) =====
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    const price = parseFloat(newProductForm.price);
-    if (Number.isNaN(price) || price < 0) {
-      return notify("error", "Veuillez saisir un prix valide.", "Prix invalide");
-    }
-    try {
-      await createProduct(activeShopId, {
-        shop_id: activeShopId,
-        name: newProductForm.name.trim(),
-        description: newProductForm.description.trim(),
-        price,
-        category: newProductForm.category.trim(),
-        image_url: newProductForm.image_url.trim()
-      });
-      await notify("success", "Produit ajouté avec succès !");
-      setNewProductForm({ name: "", description: "", price: "", category: "", image_url: "" });
-      await loadDashboardData();
-    } catch (err) {
-      const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Erreur lors de l'ajout du produit.");
-    }
-  };
-
-  const handleDeleteProduct = async (productId) => {
-    if (!(await askConfirm("Supprimer le produit", "Voulez-vous vraiment supprimer ce produit ?", "Supprimer"))) return;
-    try {
-      await deleteProduct(productId);
-      await loadDashboardData();
-    } catch (err) {
-      const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la suppression du produit.");
-    }
-  };
-
-  // Modifica di un prodotto (nome, descrizione, prezzo, categoria, immagine). Ritorna true se è andata a buon fine.
-  const handleUpdateProduct = async (productId, data) => {
-    if (Number.isNaN(data.price) || data.price < 0) {
-      await notify("error", "Veuillez saisir un prix valide.", "Prix invalide");
-      return false;
-    }
-    try {
-      await updateProduct(productId, data);
-      await loadDashboardData();
-      return true;
-    } catch (err) {
-      const detail = err?.response?.data?.detail;
-      await notify("error", typeof detail === "string" ? detail : "Erreur lors de la modification du produit.");
-      return false;
-    }
-  };
-
-  const handleAddBarber = async (e) => {
-    e.preventDefault();
-    if(!newBarberForm.name.trim()) return;
-    try {
-      await createBarber(activeShopId, { ...newBarberForm, shop_id: activeShopId });
-      await notify("success", "Collaborateur ajouté avec succès !");
-      setNewBarberForm({ name: "" });
-      await loadDashboardData();
-    } catch (err) {
-      await notify("error", "Erreur lors de l'ajout du collaborateur.");
-    }
-  };
-
-  const handleUpdateBarber = async (barberId, currentName) => {
-    const newName = await askText("Modifier le collaborateur", "Saisissez le nouveau nom du collaborateur :", currentName);
-    if (!newName || !newName.trim() || newName.trim() === currentName) return;
-    try {
-      await updateBarber(barberId, newName.trim());
-      await loadDashboardData();
-    } catch (err) {
-      await notify("error", "Erreur lors de la modification du collaborateur.");
-    }
-  };
-
-  const handleDeleteBarber = async (barberId) => {
-    if (!(await askConfirm("Supprimer le collaborateur", "Voulez-vous vraiment supprimer ce collaborateur ?", "Supprimer"))) return;
-    try {
-      await deleteBarber(barberId);
-      await loadDashboardData();
-    } catch (err) {
-      await notify("error", "Erreur lors de la suppression du collaborateur.");
-    }
-  };
-
-  const handleOpeningHoursChange = (dbDay, value) => {
-    setShopForm(prev => ({ ...prev, opening_hours: { ...prev.opening_hours, [dbDay]: value } }));
+  const handleLogout = () => {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_shop_slug");
+    localStorage.removeItem(THEME_CACHE_KEY);
+    // Svuota i dati del negozio: se poi entra un altro negozio non deve vedere quelli del precedente
+    setShopSlug(null);
+    setShopDetails(null);
+    setBookings([]);
+    setBarbers([]);
+    setSelectedBarber(null);
+    setDraftShifts([]);
+    setBusinessType("barber");
+    setIsAuthenticated(false);
   };
 
   // ===============================================
@@ -505,20 +202,7 @@ export default function AdminDashboard() {
             <p className="mt-1 font-medium text-fg-muted">Gérez les rendez-vous, votre équipe et les informations publiques.</p>
           </div>
           <button
-            onClick={() => {
-              localStorage.removeItem("admin_token");
-              localStorage.removeItem("admin_shop_slug");
-              localStorage.removeItem(THEME_CACHE_KEY);
-              // Svuota i dati del negozio: se poi entra un altro negozio non deve vedere quelli del precedente
-              setShopSlug(null);
-              setShopDetails(null);
-              setBookings([]);
-              setBarbers([]);
-              setSelectedBarber(null);
-              setDraftShifts([]);
-              setBusinessType("barber");
-              setIsAuthenticated(false);
-            }}
+            onClick={handleLogout}
             className="px-4 py-2 text-sm font-bold text-red-600 transition-colors border border-red-200 rounded-xl hover:bg-red-50"
           >
             Se déconnecter
@@ -548,12 +232,26 @@ export default function AdminDashboard() {
        
         {activeTab === "bookings" && (
           <ShopAppuntamenti_ad
-            filterDate={filterDate}
-            setFilterDate={setFilterDate}
+            view={view}
+            setView={setView}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            filterBarber={filterBarber}
+            setFilterBarber={setFilterBarber}
+            filterService={filterService}
+            setFilterService={setFilterService}
+            search={search}
+            setSearch={setSearch}
+            listScope={listScope}
+            setListScope={setListScope}
+            resetFilters={resetFilters}
             filteredBookings={filteredBookings}
             isDeleting={isDeleting}
             handleDelete={handleDelete}
+            barbers={barbers}
             services={shopDetails?.services || []}
+            businessType={businessType}
+            onRefresh={refreshBookings}
           />
         )}
 
@@ -600,7 +298,7 @@ export default function AdminDashboard() {
 
       </div>
 
-      <DialogHost dialog={dialog} onClose={closeDialog} />
+      <AdminDialog dialog={dialog} onClose={closeDialog} />
     </div>
   );
 }
