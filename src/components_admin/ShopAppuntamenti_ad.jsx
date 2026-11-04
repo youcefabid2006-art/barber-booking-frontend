@@ -1,160 +1,180 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import AgendaToolbar from "./agenda/AgendaToolbar.jsx";
+import AgendaGrid from "./agenda/AgendaGrid.jsx";
+import AgendaMonth from "./agenda/AgendaMonth.jsx";
+import AgendaList from "./agenda/AgendaList.jsx";
+import AgendaBookingModal from "./agenda/AgendaBookingModal.jsx";
+import { FALLBACK_COLOR, buildMemberColors, listRows, rangeFor, salonToday, toAgendaItem, visibleBarbers } from "./agenda/agendaUtils";
+
+// ===== TAB "Rendez-vous": L'AGENDA =====
+// Viste: Jour (colonne per membro del team), Semaine, Mois, Liste. Filtri per membro del team e servizio, combinabili.
+// Questo file mette insieme i pezzi (cartella agenda/); lo stato (vista, data, filtri) vive in hooks/useAppuntamentiAdmin.js
+// quindi cambiando tab non si perde nulla. Tutti i dati arrivano dalle API già esistenti: nessun dato di prova.
+
+// Legenda dei colori del team (nelle viste Semaine e Mois, dove le colonne non sono i membri)
+function Legend({ members, colors }) {
+  return (
+    <div className="flex flex-wrap items-center mt-4 gap-x-5 gap-y-2">
+      {members.map((b) => (
+        <span key={b.id} className="inline-flex items-center gap-2 text-xs font-bold text-fg-2">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ background: (colors[b.id] || FALLBACK_COLOR).border }} />
+          {b.name}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function ShopAppuntamenti_ad({
-  filterDate,
-  setFilterDate,
+  view,
+  setView,
+  selectedDate,
+  setSelectedDate,
+  filterBarber,
+  setFilterBarber,
+  filterService,
+  setFilterService,
+  search,
+  setSearch,
+  listScope,
+  setListScope,
+  resetFilters,
   filteredBookings,
   isDeleting,
   handleDelete,
-  services = []
+  barbers = [],
+  services = [],
+  businessType = "barber",
+  onRefresh,
 }) {
+  const [selectedId, setSelectedId] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const today = salonToday();
+  const hasFilters = Boolean(filterBarber || filterService);
+  const colors = useMemo(() => buildMemberColors(barbers, businessType), [barbers, businessType]);
+
+  // Prenotazioni (già filtrate per membro e servizio) -> elementi dell'agenda con nomi e orari nel fuso del salone.
+  // Il servizio si cerca come prima: nella prenotazione, altrimenti nell'elenco servizi del negozio.
+  const items = useMemo(() => {
+    const serviceById = new Map(services.map((s) => [s.id, s]));
+    const barberById = new Map(barbers.map((b) => [b.id, b]));
+    return filteredBookings
+      .map((b) =>
+        toAgendaItem(b, {
+          serviceName: b.service?.name || serviceById.get(b.service_id)?.name || "-",
+          barberName: b.barber?.name || barberById.get(b.barber_id)?.name || null,
+        })
+      )
+      .filter(Boolean);
+  }, [filteredBookings, services, barbers]);
+
+  // Appuntamenti del periodo mostrato (giorno / settimana / mese)
+  const rangeItems = useMemo(() => {
+    if (view === "list") return [];
+    const { from, to } = rangeFor(view, selectedDate);
+    return items.filter((it) => it.dateKey >= from && it.dateKey <= to);
+  }, [items, view, selectedDate]);
+
+  // Righe della vista Liste (periodo + ricerca + ordine)
+  const rows = useMemo(() => (view === "list" ? listRows(items, listScope, search, today) : []), [items, view, listScope, search, today]);
+
+  const count = view === "list" ? rows.length : rangeItems.length;
+  const selectedItem = items.find((it) => it.id === selectedId) || null; // se la prenotazione viene eliminata sparisce e la finestra si chiude
+
+  const openDay = (day) => {
+    setSelectedDate(day);
+    setView("day");
+  };
+
+  const handleRefresh = async () => {
+    if (!onRefresh || isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const legendMembers = view === "week" || view === "month" ? visibleBarbers(barbers, filterBarber, rangeItems) : [];
+
   return (
     <div className="animate-fade-up">
-      <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-end">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <label className="mb-1 text-xs font-bold tracking-wide uppercase text-fg">Sélectionner un jour</label>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              onClick={(e) => {try { e.currentTarget.showPicker(); } catch (err) {} }}
-              className="px-4 py-2 font-medium bg-white border border-line-strong rounded-xl focus:outline-none focus:border-primary"
-            />
-          </div>
-          <button onClick={() => setFilterDate("")} className="px-3 py-2 mt-5 text-sm font-bold transition-colors bg-white border rounded-xl border-line-strong text-fg-2 hover:bg-tint-2">
-            Tous
-          </button>
-          <button className="px-5 py-2.5 mt-5 text-sm font-bold text-white transition-all shadow-md bg-gradient-to-r from-grad-start to-grad-end rounded-xl hover:from-primary-hover hover:to-primary active:scale-95">
-            + Nouvelle
-          </button>
-        </div>
-      </div>
+      <AgendaToolbar
+        view={view}
+        setView={setView}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        count={count}
+        barbers={barbers}
+        services={services}
+        filterBarber={filterBarber}
+        setFilterBarber={setFilterBarber}
+        filterService={filterService}
+        setFilterService={setFilterService}
+        resetFilters={resetFilters}
+        listScope={listScope}
+        setListScope={setListScope}
+        onRefresh={onRefresh ? handleRefresh : null}
+        isRefreshing={isRefreshing}
+      />
 
-      <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-line-strong">
-        {/* VISTA TELEFONO (Senza scorrimento orizzontale e con distacco netto tra prenotazioni) */}
-        <div className="p-3 space-y-3 bg-tint/70 md:hidden">
-          {filteredBookings.length === 0 ? (
-            <div className="p-12 text-center bg-white rounded-xl">
-              <span className="block mb-2 text-3xl">📅</span>
-              <span className="font-medium text-fg-muted">Aucune réservation pour cette date.</span>
-            </div>
-          ) : (
-            filteredBookings.map((booking) => {
-              const dataObj = new Date(booking.start_datetime);
-              const dataFormattata = dataObj.toLocaleDateString("fr-FR", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
-              const oraFormattata = dataObj.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
-              const nomeServizio = booking.service?.name || services.find((s) => s.id === booking.service_id)?.name || "-";
-
-              return (
-                <div key={booking.id} className="relative flex flex-col gap-3 p-4 overflow-hidden transition-colors bg-white border shadow-sm border-line-strong rounded-xl">
-                  <div className="absolute top-0 bottom-0 left-0 w-1 bg-primary"></div>
-
-                  <div className="flex items-center justify-between pb-2.5 ml-1 border-b border-line">
-                    <div className="font-medium capitalize text-fg">
-                      {dataFormattata} <span className="ml-1.5 font-extrabold text-fg">{oraFormattata}</span>
-                    </div>
-                    <button
-                      onClick={() => handleDelete(booking.id)}
-                      disabled={isDeleting === booking.id}
-                      className={`px-4 py-1.5 text-xs font-bold transition-all border-2 rounded-lg
-                        ${isDeleting === booking.id
-                          ? 'border-line-strong text-fg-faint bg-tint-2 cursor-not-allowed'
-                          : 'border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 active:scale-95'}`}
-                    >
-                      {isDeleting === booking.id ? 'Annulation...' : 'Annuler'}
-                    </button>
-                  </div>
-
-<div className="flex items-start justify-between ml-1 text-sm">
-                    <div>
-                      <p className="font-bold capitalize text-fg">
-                        {booking.customer_name} {booking.customer_surname}
-                      </p>
-                      <p className="mt-0.5 font-mono text-xs font-medium text-fg-muted">
-                        {booking.customer_phone}
-                      </p>
-                      <p className="mt-2 text-xs font-bold text-fg-2">
-                        <span className="text-[10px] font-bold tracking-wider uppercase text-fg-faint mr-1.5">Service :</span>
-                        {nomeServizio}
-                      </p>
-                    </div>
-                    <div className="font-bold text-right text-fg">
-                      <span className="block text-[10px] font-bold tracking-wider uppercase text-fg-faint">Barbier</span>
-                      {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-0.5 text-xs uppercase tracking-wider bg-tint-2 text-fg-2 rounded-md">Indifférent</span>}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+      {/* Nessun appuntamento nel periodo (la griglia resta sotto: si vedono comunque i turni liberi) */}
+      {view !== "list" && rangeItems.length === 0 && (
+        <div className="flex flex-col gap-2 px-4 py-3 mb-4 text-sm font-medium rounded-xl bg-tint-2 text-fg-2 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            {hasFilters ? "Aucun rendez-vous ne correspond aux filtres sélectionnés." : "Aucun rendez-vous sur cette période."}
+          </span>
+          {hasFilters && (
+            <button type="button" onClick={resetFilters} className="font-bold text-left text-primary hover:underline sm:text-right">
+              Réinitialiser les filtres
+            </button>
           )}
         </div>
+      )}
 
-        {/* VISTA PC / DESKTOP (Tabella originale intatta con colonna Servizio e bordo di separazione netto) */}
-        <div className="hidden overflow-x-auto md:block">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-tint border-b border-line-strong">
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-fg whitespace-nowrap">Date et heure</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-fg whitespace-nowrap">Client</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-fg whitespace-nowrap">Téléphone</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-fg whitespace-nowrap">Service</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-fg whitespace-nowrap">Barbier</th>
-                <th className="p-4 text-xs font-bold tracking-wider uppercase text-fg whitespace-nowrap text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="p-12 text-center">
-                    <span className="block mb-2 text-3xl">📅</span>
-                    <span className="font-medium text-fg-muted">Aucune réservation pour cette date.</span>
-                  </td>
-                </tr>
-              ) : (
-                filteredBookings.map((booking) => {
-                  const dataObj = new Date(booking.start_datetime);
-                  const dataFormattata = dataObj.toLocaleDateString("fr-FR", { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Africa/Algiers' });
-                  const oraFormattata = dataObj.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Algiers' });
-                  const nomeServizio = booking.service?.name || services.find((s) => s.id === booking.service_id)?.name || "-";
+      {(view === "day" || view === "week") && (
+        <AgendaGrid
+          mode={view}
+          date={selectedDate}
+          items={rangeItems}
+          barbers={barbers}
+          filterBarber={filterBarber}
+          colors={colors}
+          onSelect={(it) => setSelectedId(it.id)}
+          onOpenDay={openDay}
+        />
+      )}
 
-return (
-                    <tr key={booking.id} className="transition-colors border-b-2 border-line-strong/80 hover:bg-tint group">
-                      <td className="p-4 font-medium text-fg whitespace-nowrap">
-                        {dataFormattata} <span className="ml-2 font-bold text-fg-2">{oraFormattata}</span>
-                      </td>
-                      <td className="p-4 font-bold capitalize text-fg whitespace-nowrap">
-                        {booking.customer_name} {booking.customer_surname}
-                      </td>
-                      <td className="p-4 font-mono font-medium text-fg-muted whitespace-nowrap">
-                        {booking.customer_phone}
-                      </td>
-                      <td className="p-4 font-bold text-fg whitespace-nowrap">
-                        {nomeServizio}
-                      </td>
-                      <td className="p-4 font-bold text-fg whitespace-nowrap">
-                        {booking.barber ? <span>{booking.barber.name}</span> : <span className="px-2 py-1 text-xs uppercase tracking-wider bg-tint-2 text-fg-2 rounded-md">Indifférent</span>}
-                      </td>
-                      <td className="p-4 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => handleDelete(booking.id)}
-                          disabled={isDeleting === booking.id}
-                          className={`px-4 py-1.5 text-xs font-bold transition-all border-2 rounded-lg
-                            ${isDeleting === booking.id
-                              ? 'border-line-strong text-fg-faint bg-tint-2 cursor-not-allowed'
-                              : 'border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 active:scale-95'}`}
-                        >
-                          {isDeleting === booking.id ? 'Annulation...' : 'Annuler'}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {view === "month" && <AgendaMonth date={selectedDate} items={rangeItems} colors={colors} onOpenDay={openDay} />}
+
+      {view === "list" && (
+        <AgendaList
+          items={rows}
+          colors={colors}
+          search={search}
+          setSearch={setSearch}
+          resetKey={`${listScope}|${search}|${filterBarber}|${filterService}`}
+          hasFilters={hasFilters}
+          onReset={resetFilters}
+          isDeleting={isDeleting}
+          handleDelete={handleDelete}
+          onSelect={(it) => setSelectedId(it.id)}
+        />
+      )}
+
+      {legendMembers.length > 1 && <Legend members={legendMembers} colors={colors} />}
+
+      {selectedItem && (
+        <AgendaBookingModal
+          item={selectedItem}
+          color={colors[selectedItem.barberId] || FALLBACK_COLOR}
+          isDeleting={isDeleting}
+          onDelete={handleDelete}
+          onClose={() => setSelectedId(null)}
+        />
+      )}
     </div>
   );
 }
