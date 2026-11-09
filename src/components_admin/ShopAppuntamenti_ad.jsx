@@ -4,12 +4,17 @@ import AgendaGrid from "./agenda/AgendaGrid.jsx";
 import AgendaMonth from "./agenda/AgendaMonth.jsx";
 import AgendaList from "./agenda/AgendaList.jsx";
 import AgendaBookingModal from "./agenda/AgendaBookingModal.jsx";
+import AgendaMobileList from "./agenda/AgendaMobile.jsx";
+import AgendaMobileBar from "./agenda/AgendaMobileBar.jsx";
+import { useIsPhone } from "./agenda/agendaHooks";
 import { FALLBACK_COLOR, buildMemberColors, listRows, rangeFor, salonToday, toAgendaItem, visibleBarbers } from "./agenda/agendaUtils";
 
 // ===== TAB "Rendez-vous": L'AGENDA =====
 // Viste: Jour (colonne per membro del team), Semaine, Mois, Liste. Filtri per membro del team e servizio, combinabili.
 // Questo file mette insieme i pezzi (cartella agenda/); lo stato (vista, data, filtri) vive in hooks/useAppuntamentiAdmin.js
 // quindi cambiando tab non si perde nulla. Tutti i dati arrivano dalle API già esistenti: nessun dato di prova.
+// SU TELEFONO (sotto i 768px) Jour e Semaine sono un elenco cronologico a schede (agenda/AgendaMobile.jsx), con un interruttore
+// "Cartes / Grille" per rivedere la griglia; da 768px in su resta la griglia a colonne di sempre.
 
 // Legenda dei colori del team (nelle viste Semaine e Mois, dove le colonne non sono i membri)
 function Legend({ members, colors }) {
@@ -49,6 +54,8 @@ export default function ShopAppuntamenti_ad({
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isPhone = useIsPhone();
+  const [phoneLayout, setPhoneLayout] = useState("cards"); // "cards" | "grid": vale solo su telefono
 
   const today = salonToday();
   const hasFilters = Boolean(filterBarber || filterService);
@@ -80,6 +87,8 @@ export default function ShopAppuntamenti_ad({
   const rows = useMemo(() => (view === "list" ? listRows(items, listScope, search, today) : []), [items, view, listScope, search, today]);
 
   const count = view === "list" ? rows.length : rangeItems.length;
+  const isPlanning = view === "day" || view === "week";
+  const showCards = isPhone && isPlanning && phoneLayout === "cards"; // elenco a schede (solo telefono)
   const selectedItem = items.find((it) => it.id === selectedId) || null; // se la prenotazione viene eliminata sparisce e la finestra si chiude
 
   const openDay = (day) => {
@@ -97,28 +106,54 @@ export default function ShopAppuntamenti_ad({
     }
   };
 
-  const legendMembers = view === "week" || view === "month" ? visibleBarbers(barbers, filterBarber, rangeItems) : [];
+  // La legenda non serve nell'elenco a schede su telefono: il collaboratore è scritto su ogni scheda
+  const legendMembers = (view === "week" && !showCards) || view === "month" ? visibleBarbers(barbers, filterBarber, rangeItems) : [];
 
   return (
     <div className="animate-fade-up">
-      <AgendaToolbar
-        view={view}
-        setView={setView}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        count={count}
-        barbers={barbers}
-        services={services}
-        filterBarber={filterBarber}
-        setFilterBarber={setFilterBarber}
-        filterService={filterService}
-        setFilterService={setFilterService}
-        resetFilters={resetFilters}
-        listScope={listScope}
-        setListScope={setListScope}
-        onRefresh={onRefresh ? handleRefresh : null}
-        isRefreshing={isRefreshing}
-      />
+      {isPhone ? (
+        <AgendaMobileBar
+          view={view}
+          setView={setView}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          count={count}
+          items={items}
+          barbers={barbers}
+          services={services}
+          filterBarber={filterBarber}
+          setFilterBarber={setFilterBarber}
+          filterService={filterService}
+          setFilterService={setFilterService}
+          resetFilters={resetFilters}
+          listScope={listScope}
+          setListScope={setListScope}
+          onRefresh={onRefresh ? handleRefresh : null}
+          isRefreshing={isRefreshing}
+          colors={colors}
+          phoneLayout={phoneLayout}
+          setPhoneLayout={setPhoneLayout}
+        />
+      ) : (
+        <AgendaToolbar
+          view={view}
+          setView={setView}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          count={count}
+          barbers={barbers}
+          services={services}
+          filterBarber={filterBarber}
+          setFilterBarber={setFilterBarber}
+          filterService={filterService}
+          setFilterService={setFilterService}
+          resetFilters={resetFilters}
+          listScope={listScope}
+          setListScope={setListScope}
+          onRefresh={onRefresh ? handleRefresh : null}
+          isRefreshing={isRefreshing}
+        />
+      )}
 
       {/* Nessun appuntamento nel periodo (la griglia resta sotto: si vedono comunque i turni liberi) */}
       {view !== "list" && rangeItems.length === 0 && (
@@ -134,7 +169,17 @@ export default function ShopAppuntamenti_ad({
         </div>
       )}
 
-      {(view === "day" || view === "week") && (
+      {showCards && (
+        <AgendaMobileList
+          mode={view}
+          items={rangeItems}
+          colors={colors}
+          onSelect={(it) => setSelectedId(it.id)}
+          onOpenDay={openDay}
+        />
+      )}
+
+      {isPlanning && !showCards && (
         <AgendaGrid
           mode={view}
           date={selectedDate}
