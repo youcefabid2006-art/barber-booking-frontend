@@ -109,8 +109,16 @@ const fmtMonthYear = fmt({ month: "long", year: "numeric" });
 const fmtDayMonth = fmt({ day: "numeric", month: "short" });
 const fmtDay = fmt({ day: "numeric" });
 const fmtShort = fmt({ weekday: "short", day: "2-digit", month: "short" });
+const fmtMedium = fmt({ weekday: "long", day: "numeric", month: "long" });
+const fmtPhone = fmt({ weekday: "short", day: "numeric", month: "short" });
 
 export const formatDayLong = (key) => capitalize(fmtLong.format(toUtcNoon(key)));
+
+// Senza anno, per le intestazioni dei giorni nell'elenco su telefono: "Mardi 3 novembre"
+export const formatDayMedium = (key) => capitalize(fmtMedium.format(toUtcNoon(key)));
+
+// Versione corta per la barra su telefono: "Lun. 2 nov."
+export const formatDayPhone = (key) => capitalize(fmtPhone.format(toUtcNoon(key)));
 
 // Come prima nella tabella: "mar. 03 nov."
 export const formatDayShort = (key) => fmtShort.format(toUtcNoon(key));
